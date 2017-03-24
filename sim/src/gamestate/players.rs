@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 
 use rand;
-use rand::Rng;
-use rand::distributions::{Sample, Range};
+use rand::distributions::{IndependentSample, Range};
 
 #[derive(Debug)]
 struct Power {
@@ -45,8 +44,8 @@ impl Player {
     pub fn new(name: String , team: String ) -> Player {
         // Q: Can I avoid re-creating these each time? (Not sure it matters, but still.) Neither
         // object can be `static`.
-        let mut rng = rand::weak_rng();
-        let mut PowerRange: Range<i8> = Range::new(1,6);
+        let mut rng = rand::thread_rng();
+        let power_range: Range<i8> = Range::new(1,6);
         Player {
             // Q: typname-initialization syntax versus non-typename struct initialization seems
             // inconsistent. Why not either `{}` or `()` uniformly?
@@ -55,9 +54,9 @@ impl Player {
             // Q: Why can't rustc infer that the braces are initializing a 'Power' struct? I.e., why
             // not just `power: { ....`
             power: Power {
-                red: Some(PowerRange.sample(&mut rng)),
-                blue: Some(PowerRange.sample(&mut rng)),
-                green: Some(PowerRange.sample(&mut rng))
+                red: Some(power_range.ind_sample(&mut rng)),
+                blue: Some(power_range.ind_sample(&mut rng)),
+                green: Some(power_range.ind_sample(&mut rng))
             },
             role: None
         }
