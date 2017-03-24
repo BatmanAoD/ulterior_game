@@ -2,7 +2,7 @@ mod gamestate;
 
 fn main() {
     let p = gamestate::players::Player {
-        name: String::from("Kyle"),
+        name: gamestate::players::PName( String::from("Kyle") ),
         team: String::from("Geats"),
         // Q: Why can't rustc infer that the braces are initializing a 'Power' struct? I.e., why
         // not just `power: { ....`
@@ -11,5 +11,7 @@ fn main() {
         },
         role: None
     };
-    println!("Player: {:?}", p);
+    let mut players = gamestate::players::AllPlayers::new();
+    players.add(p);
+    println!("Players are: {:?}", players);
 }
