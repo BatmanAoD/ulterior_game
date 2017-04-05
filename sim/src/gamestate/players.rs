@@ -22,8 +22,6 @@ enum Role {
 struct PName(String);
 
 #[derive(Debug)]
-// TODO constructor: take NAME only; other attributes are RANODMLY assigned
-// (....though the teams should be balanced...)
 pub struct Player {
     name: PName,
     team: String,
@@ -54,6 +52,8 @@ impl Player {
             team: team,
             // Q: Why can't rustc infer that the braces are initializing a 'Power' struct? I.e., why
             // not just `power: { ....`
+            // A?: This inference isn't worthwhile to implement because it would break with
+            // function overloading.
             power: Power {
                 red: Some(power_range.ind_sample(&mut rng)),
                 blue: Some(power_range.ind_sample(&mut rng)),
