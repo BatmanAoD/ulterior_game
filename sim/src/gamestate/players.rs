@@ -40,6 +40,7 @@ impl Player {
     // (NOTE: Need to CHANGE AllPlayers to require a *complete* list of players all at once. To
     // facilitate this, it would probably be best to have a "GameBuilder" class somewhere that
     // would validate input, construct the full player list, permit setting team names, etc.)
+    // Q: Better to take String as arg, or &str?
     pub fn new(name: String , team: String ) -> Player {
         // Q: Can I avoid re-creating these each time? (Not sure it matters, but still.) Neither
         // object can be `static`.

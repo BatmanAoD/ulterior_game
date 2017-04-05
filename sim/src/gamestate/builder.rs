@@ -1,8 +1,11 @@
 use std::collections::BTreeSet;
 
+use rand;
+use rand::distributions::{IndependentSample, Range};
+
 // Q: Isn't there some way to specify "here in the same parent module" instead of calling it
 // (gamestate) explicitly by name?
-use gamestate::players;
+use gamestate;
 
 pub struct Setup {
     team_set: TeamSet,
@@ -38,6 +41,12 @@ pub enum AddPlayerErr {
     PlayerNameDuplicated
 }
 
+#[derive(Debug)]
+pub enum StartGameErr {
+    TeamsNotEstablished,
+    TooFewPlayers
+}
+
 // Q: Does something like this already exist?
 #[must_use]
 pub type OptErr<E> = Option<E>;
@@ -50,17 +59,30 @@ impl Setup {
         }
     }
 
-    // pub fn finalize() -> gamestate::ActiveGame {
-    // Active game should have an `AllPlayers` method and somehow represent teams, etc
-    // For player in the list of player names: {
-        // let mut rng = rand::thread_rng();
-        // let power_range: Range<i8> = Range::new(0, team_set.len() - 1);
-        //
-        // // TODO easiest way to get length when we *know* the enum is `complete`?
-        // let p = gamestate::players::Player::new(
-        //     name, team_set.complete[power_range.ind_sample(&mut rng)]);
-        // }
-    // }
+    pub fn finalize(self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
+        let mut rng = rand::thread_rng();
+        let power_range: Range<usize> = Range::new(0, self.team_set.len() - 1);
+
+        match self.team_set {
+            // Q: See note below about scopes for variants
+            TeamSet::partial(_) => return Err(StartGameErr::TeamsNotEstablished),
+            TeamSet::complete(ref teams) => {
+                // Q: With the match, this begins to seem like some deep "pyramid" indenting...ways
+                // to avoid?
+                let mut players = gamestate::players::AllPlayers::new();
+                for name in self.player_names.into_iter() {
+                    players.add(
+                        gamestate::players::Player::new(
+                            name, teams[power_range.ind_sample(&mut rng)].clone()));
+                }
+                // Q: formatting??
+                Ok(gamestate::active::ActiveGame {
+                        players: players,
+                        teams: teams.clone()
+                    })
+            }
+        }
+    }
 
     pub fn add_team(&mut self, name: String) -> OptErr<AddTeamErr> {
         match self.team_set {
