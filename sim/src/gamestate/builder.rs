@@ -60,9 +60,14 @@ impl Setup {
         }
     }
 
+    // Q: Does this actually 'move' `self` so that the struct can't be re-used after calling? If
+    // so, great.
     pub fn finalize(self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
+        // XXX TODO min number of players?
+        if self.player_names.len() < 5 { return Err(StartGameErr::TooFewPlayers) }
+
         let mut rng = rand::thread_rng();
-        let power_range: Range<usize> = Range::new(0, self.team_set.len() - 1);
+        let power_range: Range<usize> = Range::new(0, self.team_set.len());
 
         match self.team_set {
             // Q: See note below about scopes for variants
@@ -74,6 +79,7 @@ impl Setup {
                 for name in self.player_names.into_iter() {
                     players.add(
                         gamestate::players::Player::new(
+                            // XXX TODO This isn't correct--somehow the teams must be BALANCED.
                             &name, &teams[power_range.ind_sample(&mut rng)]));
                 }
                 // Q: formatting??
