@@ -13,8 +13,8 @@ pub struct Setup {
 }
 
 enum TeamSet {
-    partial (BTreeSet<String>),
-    complete (Vec<String>)
+    Partial (BTreeSet<String>),
+    Complete (Vec<String>)
 }
 
 // Q: Possible to somehow just infer that `TeamSet` should provide a `len` method since all
@@ -23,8 +23,8 @@ impl TeamSet {
     pub fn len(&self) -> usize {
         return match *self {
             // Q: Why is it necessary to specify the enum name when matching on an enum?
-            TeamSet::partial(ref p) => p.len(),
-            TeamSet::complete(ref c) => c.len()
+            TeamSet::Partial(ref p) => p.len(),
+            TeamSet::Complete(ref c) => c.len()
         }
     }
 }
@@ -48,13 +48,14 @@ pub enum StartGameErr {
 }
 
 // Q: Does something like this already exist?
+// Q: Why doesn't `must_use` actually trigger a warning when the return value is ignored in `main`?
 #[must_use]
 pub type OptErr<E> = Option<E>;
 
 impl Setup {
     pub fn new_game() -> Setup {
         Setup {
-            team_set: TeamSet::partial(BTreeSet::new()),
+            team_set: TeamSet::Partial(BTreeSet::new()),
             player_names: BTreeSet::new()
         }
     }
@@ -65,15 +66,15 @@ impl Setup {
 
         match self.team_set {
             // Q: See note below about scopes for variants
-            TeamSet::partial(_) => return Err(StartGameErr::TeamsNotEstablished),
-            TeamSet::complete(ref teams) => {
+            TeamSet::Partial(_) => return Err(StartGameErr::TeamsNotEstablished),
+            TeamSet::Complete(ref teams) => {
                 // Q: With the match, this begins to seem like some deep "pyramid" indenting...ways
                 // to avoid?
                 let mut players = gamestate::players::AllPlayers::new();
                 for name in self.player_names.into_iter() {
                     players.add(
                         gamestate::players::Player::new(
-                            name, teams[power_range.ind_sample(&mut rng)].clone()));
+                            &name, &teams[power_range.ind_sample(&mut rng)]));
                 }
                 // Q: formatting??
                 Ok(gamestate::active::ActiveGame {
@@ -84,20 +85,20 @@ impl Setup {
         }
     }
 
-    pub fn add_team(&mut self, name: String) -> OptErr<AddTeamErr> {
+    pub fn add_team(&mut self, name: &str) -> OptErr<AddTeamErr> {
         match self.team_set {
             // Q: Why is `Some` in scope (without specifying `Option` or `OptErr`, but `AddTeamErr`
             // members are not?
-            TeamSet::complete(_) => return Some(AddTeamErr::PlayersAlreadyAdded),
-            TeamSet::partial(ref mut set) => {
-                let already_exists = set.insert(name);
+            TeamSet::Complete(_) => return Some(AddTeamErr::PlayersAlreadyAdded),
+            TeamSet::Partial(ref mut set) => {
+                let already_exists = set.insert(String::from(name));
                 if already_exists { return Some(AddTeamErr::TeamAlreadyExists) }
                 None
             }
         }
     }
 
-    pub fn add_player(&mut self, name: String) -> OptErr<AddPlayerErr> {
+    pub fn add_player(&mut self, name: &str) -> OptErr<AddPlayerErr> {
         // Q: Same as above about scope of `Some` vs my error enum
         if self.team_set.len() < 2 { return Some(AddPlayerErr::TeamsNotEstablished) }
         // Q: Way to infer/deduce type of `teams` here?
@@ -108,18 +109,18 @@ impl Setup {
         // Q: Can I infer the type based on the variant I want?
         let finalized: Option<Vec<String>>;
         match self.team_set {
-            TeamSet::partial(ref set) => {
+            TeamSet::Partial(ref set) => {
                 finalized = Some(set.into_iter().cloned().collect());
             }
             _ => finalized = None,
         }
 
         match finalized {
-            Some(teams) => self.team_set = TeamSet::complete(teams),
+            Some(teams) => self.team_set = TeamSet::Complete(teams),
             None => {}
         }
 
-        let already_exists = self.player_names.insert(name);
+        let already_exists = self.player_names.insert(String::from(name));
         if already_exists { return Some(AddPlayerErr::PlayerNameDuplicated) }
         None
     }
