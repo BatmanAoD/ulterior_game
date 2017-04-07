@@ -93,10 +93,9 @@ impl Setup {
                         team_end += 1;
                         extra_players -= 1;
                     }
-                    for ref name in player_list.get(team_start..team_end) {
-                        // XXX TODO `name` is somehow of type &[String], which makes no sense.
-                        // Providing the index [o] permits compiling, but is almost certainly wrong.
-                        players.add(gamestate::players::Player::new(&name/*[0]*/, team));
+                    let players_on_team = player_list.get(team_start..team_end).unwrap();
+                    for ref name in players_on_team {
+                        players.add(gamestate::players::Player::new(&name, team));
                     }
                     teams.add(&team, players);
                 }
