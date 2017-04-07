@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 
 use rand;
 use rand::distributions::{IndependentSample, Range};
+use rand::Rng;
 
 // Q: Isn't there some way to specify "here in the same parent module" instead of calling it
 // (gamestate) explicitly by name?
@@ -62,9 +63,9 @@ impl Setup {
 
     // Q: Does this actually 'move' `self` so that the struct can't be re-used after calling? If
     // so, great.
-    pub fn finalize(self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
+    pub fn finalize(mut self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
         // XXX TODO min number of players?
-        if self.player_names.len() < 5 { return Err(StartGameErr::TooFewPlayers) }
+        if self.player_names.len() < self.team_set.len() * 3 { return Err(StartGameErr::TooFewPlayers) }
 
         let mut rng = rand::thread_rng();
         let power_range: Range<usize> = Range::new(0, self.team_set.len());
@@ -72,20 +73,36 @@ impl Setup {
         match self.team_set {
             // Q: See note below about scopes for variants
             TeamSet::Partial(_) => return Err(StartGameErr::TeamsNotEstablished),
-            TeamSet::Complete(ref teams) => {
+            TeamSet::Complete(ref team_names) => {
                 // Q: With the match, this begins to seem like some deep "pyramid" indenting...ways
                 // to avoid?
-                let mut players = gamestate::players::AllPlayers::new();
-                for name in self.player_names.into_iter() {
-                    players.add(
-                        gamestate::players::Player::new(
-                            // XXX TODO This isn't correct--somehow the teams must be BALANCED.
-                            &name, &teams[power_range.ind_sample(&mut rng)]));
+
+                // Randomize player names
+                let mut player_list = self.player_names.iter().cloned().collect::<Vec<_>>();
+                rng.shuffle(&mut player_list);
+                let players_per_team = self.player_names.len() / team_names.len();
+                let mut extra_players = self.player_names.len() % team_names.len();
+                let mut team_end: usize;
+                let mut teams = gamestate::teams::TeamsByName::new();
+                for (i, team) in team_names.into_iter().enumerate() {
+                    let mut players = gamestate::players::PlayersByName::new();
+                    let team_start = i * players_per_team;
+                    team_end = team_start + players_per_team;
+                    // Add an extra player to the first (players % teams) teams
+                    if extra_players > 0 {
+                        team_end += 1;
+                        extra_players -= 1;
+                    }
+                    for ref name in player_list.get(team_start..team_end) {
+                        // XXX TODO `name` is somehow of type &[String], which makes no sense.
+                        // Providing the index [o] permits compiling, but is almost certainly wrong.
+                        players.add(gamestate::players::Player::new(&name/*[0]*/, team));
+                    }
+                    teams.add(&team, players);
                 }
                 // Q: formatting??
                 Ok(gamestate::active::ActiveGame {
-                        players: players,
-                        teams: teams.clone()
+                        teams: teams
                     })
             }
         }

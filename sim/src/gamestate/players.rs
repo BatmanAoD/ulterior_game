@@ -37,7 +37,7 @@ pub struct Player {
 
 impl Player {
     // TODO randomly assign team
-    // (NOTE: Need to CHANGE AllPlayers to require a *complete* list of players all at once. To
+    // (NOTE: Need to CHANGE PlayersByName to require a *complete* list of players all at once. To
     // facilitate this, it would probably be best to have a "GameBuilder" class somewhere that
     // would validate input, construct the full player list, permit setting team names, etc.)
     // Q: Better to take String as arg, or &str?
@@ -71,11 +71,11 @@ impl Player {
 // Apparently the Rust standard library currently doesn't provide any hashers other than SipHasher,
 // so we can't specify a faster one here.
 #[derive(Debug)]
-pub struct AllPlayers(HashMap<PName, Player>);
+pub struct PlayersByName(HashMap<PName, Player>);
 
-impl AllPlayers {
-    pub fn new() -> AllPlayers {
-        AllPlayers(HashMap::new())
+impl PlayersByName {
+    pub fn new() -> PlayersByName {
+        PlayersByName(HashMap::new())
     }
     pub fn add(&mut self, p: Player ) {
         // Q: Some way to insert using the hash directly instead of cloning the string first, since
