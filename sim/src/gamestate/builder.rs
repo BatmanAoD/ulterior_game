@@ -8,11 +8,13 @@ use rand::Rng;
 // (gamestate) explicitly by name?
 use gamestate;
 
+#[derive(Debug)]
 pub struct Setup {
     team_set: TeamSet,
     player_names: BTreeSet<String>
 }
 
+#[derive(Debug)]
 enum TeamSet {
     Partial (BTreeSet<String>),
     Complete (Vec<String>)
@@ -109,10 +111,12 @@ impl Setup {
     }
 
     pub fn add_team_or_panic(&mut self, name: &str) {
+        // XXX TODO print the *name*, not '()', on success
         println!("{:?}", self.add_team(name).unwrap());
     }
 
     pub fn add_player_or_panic(&mut self, name: &str) {
+        // XXX TODO print the *name*, not '()', on success
         println!("{:?}", self.add_player(name).unwrap());
     }
 
@@ -122,7 +126,7 @@ impl Setup {
             // members are not?
             TeamSet::Complete(_) => return Err(AddTeamErr::PlayersAlreadyAdded),
             TeamSet::Partial(ref mut set) => {
-                let already_exists = set.insert(String::from(name));
+                let already_exists = ! set.insert(String::from(name));
                 if already_exists { return Err(AddTeamErr::TeamAlreadyExists) }
                 // Q: seriously?
                 Ok(())
@@ -152,7 +156,7 @@ impl Setup {
             None => {}
         }
 
-        let already_exists = self.player_names.insert(String::from(name));
+        let already_exists = ! self.player_names.insert(String::from(name));
         if already_exists { return Err(AddPlayerErr::PlayerNameDuplicated) }
         Ok(())
     }

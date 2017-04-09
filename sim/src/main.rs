@@ -4,11 +4,14 @@ mod gamestate;
 
 fn main() {
     let mut builder = gamestate::builder::Setup::new_game();
+    // builder.add_player_or_panic("Kyle"); // panics
     builder.add_team_or_panic("Geats");
     builder.add_team_or_panic("Danes");
+    // builder.add_team_or_panic("Danes");  // panics
     builder.add_player_or_panic("Kyle");
-    // builder.add_team_or_panic("Danes");
+    // builder.add_team_or_panic("Danes");  // panics
     builder.add_player_or_panic("Laura");
+    // builder.add_player_or_panic("Laura");    // panics
     builder.add_player_or_panic("Brandon");
     builder.add_player_or_panic("Brad");
     builder.add_player_or_panic("Lauren");
