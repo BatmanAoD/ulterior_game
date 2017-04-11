@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use rand;
-use rand::distributions::{Range};
+use rand::distributions::Range;
 use rand::Rng;
 
 // Q: Isn't there some way to specify "here in the same parent module" instead of calling it
@@ -11,13 +11,13 @@ use gamestate;
 #[derive(Debug)]
 pub struct Setup {
     team_set: TeamSet,
-    player_names: BTreeSet<String>
+    player_names: BTreeSet<String>,
 }
 
-#[derive(Debug)]
+#[derive(Clone,Debug)]
 enum TeamSet {
-    Partial (BTreeSet<String>),
-    Complete (Vec<String>)
+    Partial(BTreeSet<String>),
+    Complete(Vec<String>),
 }
 
 // Q: Possible to somehow just infer that `TeamSet` should provide a `len` method since all
@@ -25,29 +25,29 @@ enum TeamSet {
 impl TeamSet {
     pub fn len(&self) -> usize {
         return match *self {
-            // Q: Why is it necessary to specify the enum name when matching on an enum?
-            TeamSet::Partial(ref p) => p.len(),
-            TeamSet::Complete(ref c) => c.len()
-        }
+                   // Q: Why is it necessary to specify the enum name when matching on an enum?
+                   TeamSet::Partial(ref p) => p.len(),
+                   TeamSet::Complete(ref c) => c.len(),
+               };
     }
 }
 
 #[derive(Debug)]
 pub enum AddTeamErr {
     PlayersAlreadyAdded,
-    TeamAlreadyExists
+    TeamAlreadyExists,
 }
 
 #[derive(Debug)]
 pub enum AddPlayerErr {
     TeamsNotEstablished,
-    PlayerNameDuplicated
+    PlayerNameDuplicated,
 }
 
 #[derive(Debug)]
 pub enum StartGameErr {
     TeamsNotEstablished,
-    TooFewPlayers
+    TooFewPlayers,
 }
 
 // Q: Why doesn't `must_use` actually trigger a warning when the return value is ignored in `main`?
@@ -61,7 +61,7 @@ impl Setup {
     pub fn new_game() -> Setup {
         Setup {
             team_set: TeamSet::Partial(BTreeSet::new()),
-            player_names: BTreeSet::new()
+            player_names: BTreeSet::new(),
         }
     }
 
@@ -69,7 +69,9 @@ impl Setup {
     // so, great.
     pub fn finalize(self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
         // XXX TODO min number of players?
-        if self.player_names.len() < self.team_set.len() * 3 { return Err(StartGameErr::TooFewPlayers) }
+        if self.player_names.len() < self.team_set.len() * 3 {
+            return Err(StartGameErr::TooFewPlayers);
+        }
 
         let mut rng = rand::thread_rng();
 
@@ -102,10 +104,7 @@ impl Setup {
                     }
                     teams.add(&team, players);
                 }
-                // Q: formatting??
-                Ok(gamestate::active::ActiveGame {
-                        teams: teams
-                    })
+                Ok(gamestate::active::ActiveGame { teams: teams })
             }
         }
     }
@@ -126,8 +125,10 @@ impl Setup {
             // members are not?
             TeamSet::Complete(_) => return Err(AddTeamErr::PlayersAlreadyAdded),
             TeamSet::Partial(ref mut set) => {
-                let already_exists = ! set.insert(String::from(name));
-                if already_exists { return Err(AddTeamErr::TeamAlreadyExists) }
+                let already_exists = !set.insert(String::from(name));
+                if already_exists {
+                    return Err(AddTeamErr::TeamAlreadyExists);
+                }
                 // Q: seriously?
                 Ok(())
             }
@@ -136,28 +137,49 @@ impl Setup {
 
     pub fn add_player(&mut self, name: &str) -> OptErr<AddPlayerErr> {
         // Q: Same as above about scope of `Err` vs my error enum
-        if self.team_set.len() < 2 { return Err(AddPlayerErr::TeamsNotEstablished) }
-        // Q: Way to infer/deduce type of `teams` here?
-        // let teams: &TeamSet;
-        // Q: How on *earth* do I conditionally re-assign an enum to a different variant, based on
-        // the variant it is when we enter the function?
-        // This `Option` thing seems like a terrible kludge, and it's really annoying.
-        // Q: Can I infer the type based on the variant I want?
-        let finalized: Option<Vec<String>>;
-        match self.team_set {
+        if self.team_set.len() < 2 {
+            return Err(AddPlayerErr::TeamsNotEstablished);
+        }
+
+        let final_team = match self.team_set {
             TeamSet::Partial(ref set) => {
-                finalized = Some(set.into_iter().cloned().collect());
-            }
-            _ => finalized = None,
-        }
+                TeamSet::Complete(set.into_iter().cloned().collect())
+            },
+            // Q: When `TeamSet` doesn't implement `Clone`, this gives a confusing error:
+            // 'match arms have incompatible types...found &TeamSet'
+            // ....can this be made nicer? It's not clear why the compiler can't tell that
+            // `.clone()` simply *can't be called* on `complete`, rather than guessing that
+            // `complete.clone()` is a *reference*.
+            ref complete => complete.clone(),
+        };
+        self.team_set = final_team;
 
-        match finalized {
-            Some(teams) => self.team_set = TeamSet::Complete(teams),
-            None => {}
-        }
+        // Alternate versions of the above:
+        // This works as well, but seems slightly more awkward than the above.
+//        let mut complete = self.team_set.clone();
+//        if let TeamSet::Partial(ref partial) = self.team_set {
+//            complete = TeamSet::Complete(partial.into_iter().cloned().collect());
+//        }
+//        self.team_set = complete;
 
-        let already_exists = ! self.player_names.insert(String::from(name));
-        if already_exists { return Err(AddPlayerErr::PlayerNameDuplicated) }
+        // This works but is awkward. Two match statements! Explicit variable typing!
+//        let finalized: Option<Vec<String>>;
+//        match self.team_set {
+//            TeamSet::Partial(ref set) => {
+//                finalized = Some(set.into_iter().cloned().collect());
+//            }
+//            _ => finalized = None,
+//        }
+//
+//        match finalized {
+//            Some(teams) => self.team_set = TeamSet::Complete(teams),
+//            None => {}
+//        }
+
+        let already_exists = !self.player_names.insert(String::from(name));
+        if already_exists {
+            return Err(AddPlayerErr::PlayerNameDuplicated);
+        }
         Ok(())
     }
 }
