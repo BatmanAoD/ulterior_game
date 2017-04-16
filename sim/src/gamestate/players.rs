@@ -4,6 +4,13 @@ use rand;
 use rand::distributions::{IndependentSample, Range};
 
 #[derive(Debug)]
+pub enum PowerType {
+    Red,
+    Blue,
+    Green
+}
+
+#[derive(Debug)]
 struct Power {
     red: Option<i8>,
     blue: Option<i8>,
