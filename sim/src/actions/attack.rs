@@ -15,22 +15,59 @@ struct DeclaredAttack {
 fn DeclareAttack(attacker: &str,
                  defender: &str,
                  def_power: PowerType)
-                 // Q: easier way to declare this?
-                 // Unstable feature:
+                 // Note: could use unstable feature:
                  // http://www.integer32.com/2017/02/02/stupid-tricks-with-higher-order-functions.html
-                 -> Box<Fn<Option<&str> -> Fn<Option<&str> -> Outcome>>> {
+                 -> AddingDefendersResult {
+
     let mut attack = DeclaredAttack {
         attackers: vec![attacker],
         defenders: vec![defender],
-        def_power: PowerType };
+        def_power: def_power };
 
-    |co_defender: Option<&str>| AddDefender(attack, co_defender)
+    AddingDefendersResult::AddDefender{attack: attack}
 }
 
-fn AddDefender(attack: &mut DeclaredAttack, co_defender: Option<&str>) -> Box<AddAttacker> {
+enum AddingDefendersResult {
+    AddDefender,
+    AddAttacker
+}
+
+enum AddingAttackersResult {
+    AddAttacker,
+    Outcome
+}
+
+struct AddDefender {
+    attack: DeclaredAttack
+}
+
+
+impl FnOnce for AddDefender {
+    type Output = AddingDefendersResult;
+
+    // XXX Impl `FnOnce` without the unsafe ABI stuff?
+    extern "rust-call" fn call_once(&self, name: Option<&str>) -> Self::Output {
+        AddDefender_impl(self.attack, name)
+    }
+}
+
+struct AddAttacker {
+    attack: DeclaredAttack
+}
+
+
+impl FnOnce for AddAttacker {
+    type Output = AddingAttackersResult;
+
+    extern "rust-call" fn call_once(&self, name: Option<&str>) -> Self::Output {
+        AddAttacker_impl(self.attack, name)
+    }
+}
+
+fn AddDefender_impl(attack: DeclaredAttack, co_defender: Option<&str>) -> AddingDefendersResult {
     unimplemented!();
 }
 
-fn AddAttacker(co_attacker: Option<&str>) -> Outcome {
+fn AddAttacker_impl(attack: DeclaredAttack, co_attacker: Option<&str>) -> AddingAttackersResult {
     unimplemented!();
 }
