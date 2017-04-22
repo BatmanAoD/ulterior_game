@@ -3,4 +3,4 @@ use gamestate::teams;
 
 struct Attack {}
 
-fn StartAttack(attacker: &str, defender: &str, really_really_really_long_arg_name: &str, def_power: PowerType) -> Attack {}
+fn StartAttack(attacker: &str, defender: &str, def_power: PowerType) -> Attack {}

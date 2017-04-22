@@ -163,6 +163,7 @@ impl Setup {
 //        self.team_set = complete;
 
         // This works but is awkward. Two match statements! Explicit variable typing!
+        // ...note that `finalized` could be a `mut None`, which would infer `<Vec<String>>`
 //        let finalized: Option<Vec<String>>;
 //        match self.team_set {
 //            TeamSet::Partial(ref set) => {
