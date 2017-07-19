@@ -9,8 +9,8 @@ use gamestate::active::ActiveGame;
 pub struct Outcome {}
 
 struct DeclaredAttack {
-    attackers: Vec<&str>,
-    defenders: Vec<&str>,
+    attackers: Vec<String>,
+    defenders: Vec<String>,
     def_power: PowerType
 }
 
@@ -24,21 +24,21 @@ fn DeclareAttack(attacker: &str,
                  -> AddingDefendersResult {
 
     let mut attack = DeclaredAttack {
-        attackers: vec![attacker],
-        defenders: vec![defender],
+        attackers: vec![String::from(attacker)],
+        defenders: vec![String::from(defender)],
         def_power: def_power };
 
-    AddingDefendersResult::AddDefender{attack: attack}
+    AddingDefendersResult::AddDefender{0.attack: attack}
 }
 
 enum AddingDefendersResult {
-    AddDefender,
-    AddAttacker
+    AddDefender(AddDefender),
+    AddAttacker(AddAttacker)
 }
 
 enum AddingAttackersResult {
-    AddAttacker,
-    Outcome
+    AddAttacker(AddAttacker),
+    Outcome(Outcome)
 }
 
 struct AddDefender {
@@ -54,7 +54,7 @@ impl AddDefender {
         AddDefender_impl(self.attack, name);
     }
     fn finalize_defense(self) {
-        AddAttacker { attack: self.attack }
+        AddAttacker { 0.attack: self.attack }
     }
 }
 

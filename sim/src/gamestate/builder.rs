@@ -65,8 +65,6 @@ impl Setup {
         }
     }
 
-    // Q: Does this actually 'move' `self` so that the struct can't be re-used after calling? If
-    // so, great.
     pub fn finalize(self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
         // XXX TODO min number of players?
         if self.player_names.len() < self.team_set.len() * 3 {
@@ -110,13 +108,13 @@ impl Setup {
     }
 
     pub fn add_team_or_panic(&mut self, name: &str) {
-        // XXX TODO print the *name*, not '()', on success
-        println!("{:?}", self.add_team(name).unwrap());
+        self.add_team(name).unwrap();
+        println!("Added team: {}", name);
     }
 
     pub fn add_player_or_panic(&mut self, name: &str) {
-        // XXX TODO print the *name*, not '()', on success
-        println!("{:?}", self.add_player(name).unwrap());
+        self.add_player(name).unwrap();
+        println!("Added player: {}", name);
     }
 
     pub fn add_team(&mut self, name: &str) -> OptErr<AddTeamErr> {
