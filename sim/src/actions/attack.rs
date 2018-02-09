@@ -45,31 +45,18 @@ struct AddDefender {
     attack: DeclaredAttack
 }
 
-// TODO figure out why functional/closure-based approach didn't work
-// (in particular, how to create functors w/out incurring the "ABI is subject to change" error for
-// `impl` of `FnMut`?)
-
 impl AddDefender {
     fn add(&mut self, name: &str) {
-        AddDefender_impl(self.attack, name);
+        AddDefender_impl(self.attack, name)
     }
     fn finalize_defense(self) {
         AddAttacker { 0.attack: self.attack }
     }
+    // XXX TODO IMMEDIATE - did I want a generic 'call the struct itself like a function' deref for
+    // some reason....?
+    // If so, see:
+    // https://dev.to/mindflavor/lets-build-zork-using-rust-1opm
 }
-
-// TODO: define custom traits inheriting from FnOnce?
-// See http://stackoverflow.com/a/26071172/1858225 for possible syntax, although that's from about a
-// year before the release of 1.0
-
-//impl FnOnce for AddDefender {
-//    type Output = AddingDefendersResult;
-//
-//    // XXX Impl `FnOnce` without the unsafe ABI stuff?
-//    extern "rust-call" fn call_once(&self, name: Option<&str>) -> Self::Output {
-//        AddDefender_impl(self.attack, name)
-//    }
-//}
 
 struct AddAttacker {
     attack: DeclaredAttack
