@@ -28,7 +28,8 @@ fn DeclareAttack(attacker: &str,
         defenders: vec![String::from(defender)],
         def_power: def_power };
 
-    AddingDefendersResult::AddDefender{0.attack: attack}
+    // Q: Any way to infer the inner `AddDefender` type?
+    AddingDefendersResult::AddDefender(AddDefender{attack: attack})
 }
 
 enum AddingDefendersResult {
@@ -46,11 +47,13 @@ struct AddDefender {
 }
 
 impl AddDefender {
-    fn add(&mut self, name: &str) {
-        AddDefender_impl(self.attack, name)
+    fn add(self, name: &str) -> AddingDefendersResult {
+        // Q: Why no automatic wrapping as `Some`?
+        // Maybe add a `derive` to impl deref as `Some`?
+        AddDefender_impl(self.attack, Some(name))
     }
-    fn finalize_defense(self) {
-        AddAttacker { 0.attack: self.attack }
+    fn finalize_defense(self) -> AddAttacker {
+        AddAttacker { attack: self.attack }
     }
     // XXX TODO IMMEDIATE - did I want a generic 'call the struct itself like a function' deref for
     // some reason....?
@@ -63,8 +66,8 @@ struct AddAttacker {
 }
 
 impl AddAttacker {
-    fn add(&mut self, name: &str) { AddAttacker_impl(self.attack, name); }
-    fn finalize_offense(self) {
+    fn add(self, name: &str) { AddAttacker_impl(self.attack, Some(name)); }
+    fn finalize_offense(self) -> Outcome {
         Outcome { /* XXX TODO */ }
     }
 }
