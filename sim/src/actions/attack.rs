@@ -16,7 +16,7 @@ struct DeclaredAttack {
 
 // Initiates an attack, returning a closure over the data necessary to perform the next step of the
 // attack.
-fn DeclareAttack(attacker: &str,
+fn declare_attack(attacker: &str,
                  defender: &str,
                  def_power: PowerType)
                  // Note: could use unstable feature:
@@ -28,32 +28,32 @@ fn DeclareAttack(attacker: &str,
         defenders: vec![String::from(defender)],
         def_power: def_power };
 
-    // Q: Any way to infer the inner `add_defender` type?
-    AddingDefendersResult::add_defender(add_defender{attack: attack})
+    // Q: Any way to infer the inner `AddDefender` type?
+    AddingDefendersResult::AddDefender(AddDefender{attack: attack})
 }
 
 enum AddingDefendersResult {
-    add_defender(add_defender),
-    add_attacker(add_attacker)
+    AddDefender(AddDefender),
+    AddAttacker(AddAttacker)
 }
 
 enum AddingAttackersResult {
-    add_attacker(add_attacker),
+    AddAttacker(AddAttacker),
     Outcome(Outcome)
 }
 
-struct add_defender {
+struct AddDefender {
     attack: DeclaredAttack
 }
 
-impl add_defender {
+impl AddDefender {
     fn add(self, name: &str) -> AddingDefendersResult {
         // Q: Why no automatic wrapping as `Some`?
         // Maybe add a `derive` to impl deref as `Some`?
         add_defender_impl(self.attack, Some(name))
     }
-    fn finalize_defense(self) -> add_attacker {
-        add_attacker { attack: self.attack }
+    fn finalize_defense(self) -> AddAttacker {
+        AddAttacker { attack: self.attack }
     }
     // XXX TODO IMMEDIATE - did I want a generic 'call the struct itself like a function' deref for
     // some reason....?
@@ -61,11 +61,11 @@ impl add_defender {
     // https://dev.to/mindflavor/lets-build-zork-using-rust-1opm
 }
 
-struct add_attacker {
+struct AddAttacker {
     attack: DeclaredAttack
 }
 
-impl add_attacker {
+impl AddAttacker {
     fn add(self, name: &str) { add_attacker_impl(self.attack, Some(name)); }
     fn finalize_offense(self) -> Outcome {
         Outcome { /* XXX TODO */ }
