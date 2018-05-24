@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use rand;
-use rand::distributions::{IndependentSample, Range};
+use rand::distributions::{Distribution, Range};
 
 #[derive(Debug)]
 pub enum PowerType {
@@ -66,9 +66,9 @@ impl Player {
             // A?: This inference isn't worthwhile to implement because it would break with
             // function overloading.
             power: Power {
-                red: Some(power_range.ind_sample(&mut rng)),
-                blue: Some(power_range.ind_sample(&mut rng)),
-                green: Some(power_range.ind_sample(&mut rng))
+                red: Some(power_range.sample(&mut rng)),
+                blue: Some(power_range.sample(&mut rng)),
+                green: Some(power_range.sample(&mut rng))
             },
             role: None
         }

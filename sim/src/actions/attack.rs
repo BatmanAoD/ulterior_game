@@ -28,32 +28,32 @@ fn DeclareAttack(attacker: &str,
         defenders: vec![String::from(defender)],
         def_power: def_power };
 
-    // Q: Any way to infer the inner `AddDefender` type?
-    AddingDefendersResult::AddDefender(AddDefender{attack: attack})
+    // Q: Any way to infer the inner `add_defender` type?
+    AddingDefendersResult::add_defender(add_defender{attack: attack})
 }
 
 enum AddingDefendersResult {
-    AddDefender(AddDefender),
-    AddAttacker(AddAttacker)
+    add_defender(add_defender),
+    add_attacker(add_attacker)
 }
 
 enum AddingAttackersResult {
-    AddAttacker(AddAttacker),
+    add_attacker(add_attacker),
     Outcome(Outcome)
 }
 
-struct AddDefender {
+struct add_defender {
     attack: DeclaredAttack
 }
 
-impl AddDefender {
+impl add_defender {
     fn add(self, name: &str) -> AddingDefendersResult {
         // Q: Why no automatic wrapping as `Some`?
         // Maybe add a `derive` to impl deref as `Some`?
-        AddDefender_impl(self.attack, Some(name))
+        add_defender_impl(self.attack, Some(name))
     }
-    fn finalize_defense(self) -> AddAttacker {
-        AddAttacker { attack: self.attack }
+    fn finalize_defense(self) -> add_attacker {
+        add_attacker { attack: self.attack }
     }
     // XXX TODO IMMEDIATE - did I want a generic 'call the struct itself like a function' deref for
     // some reason....?
@@ -61,12 +61,12 @@ impl AddDefender {
     // https://dev.to/mindflavor/lets-build-zork-using-rust-1opm
 }
 
-struct AddAttacker {
+struct add_attacker {
     attack: DeclaredAttack
 }
 
-impl AddAttacker {
-    fn add(self, name: &str) { AddAttacker_impl(self.attack, Some(name)); }
+impl add_attacker {
+    fn add(self, name: &str) { add_attacker_impl(self.attack, Some(name)); }
     fn finalize_offense(self) -> Outcome {
         Outcome { /* XXX TODO */ }
     }
@@ -81,10 +81,10 @@ impl AddAttacker {
 //    }
 //}
 
-fn AddDefender_impl(attack: DeclaredAttack, co_defender: Option<&str>) -> AddingDefendersResult {
+fn add_defender_impl(attack: DeclaredAttack, co_defender: Option<&str>) -> AddingDefendersResult {
     unimplemented!();
 }
 
-fn AddAttacker_impl(attack: DeclaredAttack, co_attacker: Option<&str>) -> AddingAttackersResult {
+fn add_attacker_impl(attack: DeclaredAttack, co_attacker: Option<&str>) -> AddingAttackersResult {
     unimplemented!();
 }
