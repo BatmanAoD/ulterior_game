@@ -55,10 +55,6 @@ impl AddDefender {
     fn finalize_defense(self) -> AddAttacker {
         AddAttacker { attack: self.attack }
     }
-    // XXX TODO IMMEDIATE - did I want a generic 'call the struct itself like a function' deref for
-    // some reason....?
-    // If so, see:
-    // https://dev.to/mindflavor/lets-build-zork-using-rust-1opm
 }
 
 struct AddAttacker {
@@ -71,15 +67,6 @@ impl AddAttacker {
         Outcome { /* XXX TODO */ }
     }
 }
-
-// See above
-//impl fnonce for addattacker {
-//    type output = addingattackersresult;
-//
-//    extern "rust-call" fn call_once(&self, name: option<&str>) -> self::output {
-//        addattacker_impl(self.attack, name)
-//    }
-//}
 
 fn add_defender_impl(attack: DeclaredAttack, co_defender: Option<&str>) -> AddingDefendersResult {
     unimplemented!();
