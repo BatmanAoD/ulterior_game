@@ -1,4 +1,4 @@
-use gamestate;
+use crate::gamestate;
 
 #[derive(Debug)]
 pub struct ActiveGame {

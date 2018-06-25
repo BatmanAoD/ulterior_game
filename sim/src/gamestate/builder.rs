@@ -6,7 +6,7 @@ use rand::Rng;
 
 // Q: Isn't there some way to specify "here in the same parent module" instead of calling it
 // (gamestate) explicitly by name?
-use gamestate;
+use crate::gamestate;
 
 #[derive(Debug)]
 pub struct Setup {

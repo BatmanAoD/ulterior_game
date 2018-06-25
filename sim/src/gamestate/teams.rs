@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use gamestate::players;
+use crate::gamestate::players;
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 struct TName(String);

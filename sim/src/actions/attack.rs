@@ -1,6 +1,6 @@
-use gamestate::players::PowerType;
-use gamestate::teams;
-use gamestate::active::ActiveGame;
+use crate::gamestate::players::PowerType;
+use crate::gamestate::teams;
+use crate::gamestate::active::ActiveGame;
 
 // XXX TODO this must contain (and calculate in its constructor) the effect on the gamestate.
 // This includes:
@@ -68,10 +68,10 @@ impl AddAttacker {
     }
 }
 
-fn add_defender_impl(attack: DeclaredAttack, co_defender: Option<&str>) -> AddingDefendersResult {
+fn add_defender_impl(_attack: DeclaredAttack, _co_defender: Option<&str>) -> AddingDefendersResult {
     unimplemented!();
 }
 
-fn add_attacker_impl(attack: DeclaredAttack, co_attacker: Option<&str>) -> AddingAttackersResult {
+fn add_attacker_impl(_attack: DeclaredAttack, _co_attacker: Option<&str>) -> AddingAttackersResult {
     unimplemented!();
 }
