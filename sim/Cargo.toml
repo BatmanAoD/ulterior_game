@@ -2,6 +2,7 @@ cargo-features = ["edition"]
 
 [package]
 name = "ult"
+edition = '2018'
 version = "0.1.0"
 authors = ["KJSTRAND"]
 
