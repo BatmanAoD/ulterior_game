@@ -23,7 +23,7 @@ fn declare_attack(attacker: &str,
                  // http://www.integer32.com/2017/02/02/stupid-tricks-with-higher-order-functions.html
                  -> AddingDefendersResult {
 
-    let mut attack = DeclaredAttack {
+    let attack = DeclaredAttack {
         attackers: vec![String::from(attacker)],
         defenders: vec![String::from(defender)],
         def_power: def_power };
