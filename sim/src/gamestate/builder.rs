@@ -14,7 +14,7 @@ pub struct Setup {
     player_names: BTreeSet<String>,
 }
 
-#[derive(Clone,Debug)]
+#[derive(Clone, Debug)]
 enum TeamSet {
     Partial(BTreeSet<String>),
     Complete(Vec<String>),
@@ -25,10 +25,10 @@ enum TeamSet {
 impl TeamSet {
     pub fn len(&self) -> usize {
         return match *self {
-                   // Q: Why is it necessary to specify the enum name when matching on an enum?
-                   TeamSet::Partial(ref p) => p.len(),
-                   TeamSet::Complete(ref c) => c.len(),
-               };
+            // Q: Why is it necessary to specify the enum name when matching on an enum?
+            TeamSet::Partial(ref p) => p.len(),
+            TeamSet::Complete(ref c) => c.len(),
+        };
     }
 }
 
@@ -140,9 +140,7 @@ impl Setup {
         }
 
         let final_team = match self.team_set {
-            TeamSet::Partial(ref set) => {
-                TeamSet::Complete(set.into_iter().cloned().collect())
-            },
+            TeamSet::Partial(ref set) => TeamSet::Complete(set.into_iter().cloned().collect()),
             // Q: When `TeamSet` doesn't implement `Clone`, this gives a confusing error:
             // 'match arms have incompatible types...found &TeamSet'
             // ....can this be made nicer? It's not clear why the compiler can't tell that
@@ -154,26 +152,26 @@ impl Setup {
 
         // Alternate versions of the above:
         // This works as well, but seems slightly more awkward than the above.
-//        let mut complete = self.team_set.clone();
-//        if let TeamSet::Partial(ref partial) = self.team_set {
-//            complete = TeamSet::Complete(partial.into_iter().cloned().collect());
-//        }
-//        self.team_set = complete;
+        //        let mut complete = self.team_set.clone();
+        //        if let TeamSet::Partial(ref partial) = self.team_set {
+        //            complete = TeamSet::Complete(partial.into_iter().cloned().collect());
+        //        }
+        //        self.team_set = complete;
 
         // This works but is awkward. Two match statements! Explicit variable typing!
         // ...note that `finalized` could be a `mut None`, which would infer `<Vec<String>>`
-//        let finalized: Option<Vec<String>>;
-//        match self.team_set {
-//            TeamSet::Partial(ref set) => {
-//                finalized = Some(set.into_iter().cloned().collect());
-//            }
-//            _ => finalized = None,
-//        }
-//
-//        match finalized {
-//            Some(teams) => self.team_set = TeamSet::Complete(teams),
-//            None => {}
-//        }
+        //        let finalized: Option<Vec<String>>;
+        //        match self.team_set {
+        //            TeamSet::Partial(ref set) => {
+        //                finalized = Some(set.into_iter().cloned().collect());
+        //            }
+        //            _ => finalized = None,
+        //        }
+        //
+        //        match finalized {
+        //            Some(teams) => self.team_set = TeamSet::Complete(teams),
+        //            None => {}
+        //        }
 
         let already_exists = !self.player_names.insert(String::from(name));
         if already_exists {

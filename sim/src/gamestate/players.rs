@@ -7,14 +7,14 @@ use rand::distributions::{Distribution, Range};
 pub enum PowerType {
     Red,
     Blue,
-    Green
+    Green,
 }
 
 #[derive(Debug)]
 struct Power {
     red: Option<i8>,
     blue: Option<i8>,
-    green: Option<i8>
+    green: Option<i8>,
 }
 
 // TODO move to separate file
@@ -39,7 +39,7 @@ pub struct Player {
     // TODO replace 'public' field with accessor functions (roles are NEVER
     // changed; they are ONLY used to (1) impact player behavior and (2)
     // determine victory conditions)
-    role: Option<Box<Role>>
+    role: Option<Box<Role>>,
 }
 
 impl Player {
@@ -48,18 +48,18 @@ impl Player {
     // facilitate this, it would probably be best to have a "GameBuilder" class somewhere that
     // would validate input, construct the full player list, permit setting team names, etc.)
     // Q: Better to take String as arg, or &str?
-    pub fn new(name: &str , team: &str ) -> Player {
+    pub fn new(name: &str, team: &str) -> Player {
         // Q: Can I avoid re-creating these each time? (Not sure it matters, but still.) Neither
         // object can be `static`.
         let mut rng = rand::thread_rng();
-        let power_range: Range<i8> = Range::new(1,6);
+        let power_range: Range<i8> = Range::new(1, 6);
         Player {
             // Q: typname-initialization syntax versus non-typename struct initialization seems
             // inconsistent. Why not either `{}` or `()` uniformly?
             // A?: Something about tuples vs structs...? Does that really matter?
             // Q: Why can't initialization just infer that I want all my `&str`s to become
             // `String`s, whenever that's what I'm assigning to?
-            name: PName( String::from(name) ),
+            name: PName(String::from(name)),
             team: String::from(team),
             // Q: Why can't rustc infer that the braces are initializing a 'Power' struct? I.e., why
             // not just `power: { ....`
@@ -68,9 +68,9 @@ impl Player {
             power: Power {
                 red: Some(power_range.sample(&mut rng)),
                 blue: Some(power_range.sample(&mut rng)),
-                green: Some(power_range.sample(&mut rng))
+                green: Some(power_range.sample(&mut rng)),
             },
-            role: None
+            role: None,
         }
     }
 }
@@ -84,7 +84,7 @@ impl PlayersByName {
     pub fn new() -> PlayersByName {
         PlayersByName(HashMap::new())
     }
-    pub fn add(&mut self, p: Player ) {
+    pub fn add(&mut self, p: Player) {
         // Q: Some way to insert using the hash directly instead of cloning the string first, since
         // the actual string isn't really necessary?
         self.0.insert(p.name.clone(), p);

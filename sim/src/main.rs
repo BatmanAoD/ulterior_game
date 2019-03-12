@@ -1,7 +1,7 @@
 extern crate rand;
 
-mod gamestate;
 mod actions;
+mod gamestate;
 
 fn main() {
     let mut builder = gamestate::builder::Setup::new_game();

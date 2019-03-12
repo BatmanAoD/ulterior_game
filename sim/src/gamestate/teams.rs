@@ -12,7 +12,7 @@ impl TeamsByName {
     pub fn new() -> TeamsByName {
         TeamsByName(HashMap::new())
     }
-    pub fn add(&mut self, t: &str, p: players::PlayersByName ) {
+    pub fn add(&mut self, t: &str, p: players::PlayersByName) {
         self.0.insert(TName(String::from(t)), p);
     }
 }
