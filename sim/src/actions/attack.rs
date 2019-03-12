@@ -8,7 +8,8 @@ use crate::gamestate::teams;
 //  * Honor gained by winning players' team
 pub struct Outcome {}
 
-struct DeclaredAttack {
+#[derive(Debug)]
+pub struct DeclaredAttack {
     attackers: Vec<String>,
     defenders: Vec<String>,
     def_power: PowerType,
@@ -17,46 +18,50 @@ struct DeclaredAttack {
 impl DeclaredAttack {
     // Initiates an attack, returning a closure over the data necessary to perform the next step of the
     // attack.
-    fn declare(attacker: &str, defender: &str, def_power: PowerType) -> AddDefender {
+    pub fn declare(attacker: &str, defender: &str, def_power: PowerType) -> AddDefender {
         let attack = DeclaredAttack {
             attackers: vec![String::from(attacker)],
             defenders: vec![String::from(defender)],
             def_power: def_power,
         };
 
-        // Q: Any way to infer the inner `AddDefender` type?
         AddDefender { attack }
     }
 
-    fn finalize(self) -> Outcome {
+    pub fn finalize(self) -> Outcome {
+        println!("Attack state when finalized: {:#?}", self);
         unimplemented!();
     }
 }
 
-struct AddDefender {
+pub struct AddDefender {
     attack: DeclaredAttack,
 }
 
 impl AddDefender {
-    fn add(&mut self, name: &str) {
+    pub fn add(mut self, name: &str) -> Self {
+        // TODO warn if defender is on attacker's team?
         self.attack.defenders.push(name.to_owned());
+        self
     }
-    fn finalize_defense(self) -> AddAttacker {
+    pub fn finalize_defense(self) -> AddAttacker {
         AddAttacker {
             attack: self.attack,
         }
     }
 }
 
-struct AddAttacker {
+pub struct AddAttacker {
     attack: DeclaredAttack,
 }
 
 impl AddAttacker {
-    fn add(&mut self, name: &str) {
+    pub fn add(mut self, name: &str) -> Self {
+        // TODO warn if attacker is on defender's team?
         self.attack.attackers.push(name.to_owned());
+        self
     }
-    fn finalize_offense(self) -> Outcome {
+    pub fn finalize_offense(self) -> Outcome {
         self.attack.finalize()
     }
 }
