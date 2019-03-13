@@ -18,6 +18,8 @@ struct Power {
     green: Option<i8>,
 }
 
+// Impl `Index` and `IndexMut` for `Power` using `PowerType`
+
 // TODO move to separate file
 #[derive(Debug)]
 enum Role {
@@ -73,6 +75,16 @@ impl Player {
             },
             role: None,
         }
+    }
+
+    pub fn strength(&self, ptype: PowerType) -> i8 {
+        // Use `<Power as Index>`, to be implemented above
+        unimplemented!();
+    }
+
+    pub fn lose_power(&mut self, ptype: PowerType) {
+        // Use `<Power as IndexMut>`, to be implemented above
+        unimplemented!();
     }
 }
 

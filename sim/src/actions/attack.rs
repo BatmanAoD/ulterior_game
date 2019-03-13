@@ -2,6 +2,7 @@ use rand::Rng;
 
 use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::PowerType;
+use crate::gamestate::players::Player;
 // use crate::gamestate::teams;
 
 #[derive(Debug)]
@@ -13,8 +14,40 @@ pub struct Attack {
 }
 
 impl Attack {
+    fn determine_losers<'a>(self, state: &'a mut ActiveGame) -> (Vec<&'a mut Player>, PowerType) {
+        // Q: Is there a way to do this categorization into *mutable* chunks in a way that will
+        // satisfy the borrow checker?
+        let mut attackers: Vec<&mut Player> = self.attackers.iter()
+            .map(
+                |p| state.find_player_mut(p))
+            .collect();
+        let attack_strength: i16 =
+            attackers.iter()
+            // Q: is explicit casting the right way to avoid overflow here?
+            .map(|a| a.strength(self.att_power) as i16)
+            .sum();
+        /* let mut defenders: Vec<&mut Player> = self.defenders.iter()
+            .map(
+                |p| state.find_player_mut(p))
+            .collect();
+        let defense_strength: i16 =
+            defenders.iter()
+            .map(|d| d.strength(self.def_power) as i16)
+            .sum();
+        if attack_strength > defense_strength {
+            (defenders, self.def_power)
+        } else {
+        */
+            (attackers, self.att_power)
+        //}
+    }
     pub fn apply(self, state: &mut ActiveGame) {
-        unimplemented!();
+        let (losers, p_type) = self.determine_losers(&mut state);
+        for loser in losers.iter() {
+            loser.lose_power(p_type);
+            // XXX TODO: winning players should win honor!
+            unimplemented!();
+        }
     }
 }
 

@@ -1,7 +1,6 @@
 use std::collections::BTreeSet;
 
 use rand;
-use rand::distributions::Range;
 use rand::Rng;
 
 // Q: Isn't there some way to specify "here in the same parent module" instead of calling it
