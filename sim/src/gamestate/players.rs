@@ -29,20 +29,20 @@ enum Role {
 }
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-struct PName(String);
+pub struct PName(String);
 
 #[derive(Debug)]
 pub struct Player {
-    name: PName,
-    team: String,
+    pub name: PName,
+    pub team: String,
     // TODO replace 'public' field with misc accessor functions
     // and the 'fight' functionality (which will mutate by switching from
     // 'some' to 'none' if the player loses)
-    power: Power,
+    pub power: Power,
     // TODO replace 'public' field with accessor functions (roles are NEVER
     // changed; they are ONLY used to (1) impact player behavior and (2)
     // determine victory conditions)
-    role: Option<Box<Role>>,
+    pub role: Option<Box<Role>>,
 }
 
 impl Player {
@@ -101,5 +101,11 @@ impl PlayersByName {
         // Q: Some way to insert using the hash directly instead of cloning the string first, since
         // the actual string isn't really necessary?
         self.0.insert(p.name.clone(), p);
+    }
+    pub fn iter(&self) -> impl Iterator<Item = &Player> {
+        self.0.values()
+    }
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Player> {
+        self.0.values_mut()
     }
 }

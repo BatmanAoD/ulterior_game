@@ -1,14 +1,16 @@
+use itertools::{Itertools, Either};
 use rand::Rng;
 
 use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::PowerType;
 use crate::gamestate::players::Player;
+use crate::gamestate::players::PName;
 // use crate::gamestate::teams;
 
 #[derive(Debug)]
 pub struct Attack {
-    attackers: Vec<String>,
-    defenders: Vec<String>,
+    attackers: Vec<PName>,
+    defenders: Vec<PName>,
     def_power: PowerType,
     att_power: PowerType,
 }
@@ -17,16 +19,29 @@ impl Attack {
     fn determine_losers<'a>(self, state: &'a mut ActiveGame) -> (Vec<&'a mut Player>, PowerType) {
         // Q: Is there a way to do this categorization into *mutable* chunks in a way that will
         // satisfy the borrow checker?
-        let mut attackers: Vec<&mut Player> = self.attackers.iter()
-            .map(
-                |p| state.find_player_mut(p))
-            .collect();
+        let (mut attackers, others): (Vec<_>, Vec<_>) = state
+            .players_mut()
+            .partition_map(|p| {
+                if self.attackers.contains(&p.name) {
+                    Either::Left(&mut p)
+                } else {
+                    Either::Right(&mut p)
+                }
+            });
+        let (mut defenders, others) = others.iter_mut()
+            .partition_map(|p| {
+                if self.defenders.contains(&p.name) {
+                    Either::Left(&mut p)
+                } else {
+                    Either::Right(&mut p)
+                }
+            });
         let attack_strength: i16 =
             attackers.iter()
             // Q: is explicit casting the right way to avoid overflow here?
             .map(|a| a.strength(self.att_power) as i16)
             .sum();
-        /* let mut defenders: Vec<&mut Player> = self.defenders.iter()
+        let mut defenders: Vec<&mut Player> = self.defenders.iter()
             .map(
                 |p| state.find_player_mut(p))
             .collect();
@@ -37,9 +52,8 @@ impl Attack {
         if attack_strength > defense_strength {
             (defenders, self.def_power)
         } else {
-        */
             (attackers, self.att_power)
-        //}
+        }
     }
     pub fn apply(self, state: &mut ActiveGame) {
         let (losers, p_type) = self.determine_losers(&mut state);
@@ -53,19 +67,22 @@ impl Attack {
 
 #[derive(Debug)]
 pub struct DeclaredAttack {
-    attackers: Vec<String>,
-    defenders: Vec<String>,
+    attackers: Vec<PName>,
+    defenders: Vec<PName>,
     def_power: PowerType,
+    state: &ActiveGame,
 }
 
 impl DeclaredAttack {
     // Initiates an attack, returning a closure over the data necessary to perform the next step of the
     // attack.
-    pub fn declare(attacker: &str, defender: &str, def_power: PowerType) -> AddDefender {
+    // TODO: instead of Option, use `Result` indicating which `str` wasn't found
+    pub fn declare(state: &ActiveGame, attacker: &str, defender: &str, def_power: PowerType) -> Option<AddDefender> {
         let attack = DeclaredAttack {
-            attackers: vec![String::from(attacker)],
-            defenders: vec![String::from(defender)],
-            def_power: def_power,
+            attackers: vec![state.get_pname(attacker)?.to_owned()],
+            defenders: vec![state.get_pname(defender)?.to_owned()],
+            def_power,
+            state,
         };
 
         AddDefender { attack }
@@ -87,6 +104,7 @@ pub struct AddDefender {
 
 impl AddDefender {
     pub fn add(mut self, name: &str) -> Self {
+        // TODO what to do if defender already exists?
         // TODO warn if defender is on attacker's team?
         self.attack.defenders.push(name.to_owned());
         self
@@ -107,6 +125,8 @@ pub struct AddAttacker {
 
 impl AddAttacker {
     pub fn add(mut self, name: &str) -> Self {
+        // TODO what to do if attacker already exists?
+        // TODO what to do if attacker is on `defenders` list?
         // TODO warn if attacker is on defender's team?
         self.attack.attackers.push(name.to_owned());
         self
