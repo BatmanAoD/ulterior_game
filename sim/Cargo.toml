@@ -5,4 +5,5 @@ version = "0.1.0"
 authors = ["KJSTRAND"]
 
 [dependencies]
-rand = "0.5"
+rand = "*"
+rand_derive = "*"

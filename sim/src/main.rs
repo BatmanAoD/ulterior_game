@@ -21,7 +21,7 @@ fn dummy_game() {
     builder.add_player_or_panic("Annabelle");
     builder.add_player_or_panic("Aeris");
     builder.add_player_or_panic("Rosie");
-    let game = builder.finalize();
+    let mut game = builder.finalize().unwrap();
     println!("Start-of-game setup: {:#?}", &game);
 
     let attack = actions::attack::DeclaredAttack::declare(
@@ -32,5 +32,6 @@ fn dummy_game() {
         .add("Suzie")
         .finalize_offense();
 
-    // game.apply(attack);
+    println!("Attack: {:#?}", &attack);
+    attack.apply(&mut game);
 }

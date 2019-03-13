@@ -1,12 +1,22 @@
+use rand::Rng;
+
 use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::PowerType;
-use crate::gamestate::teams;
+// use crate::gamestate::teams;
 
-// XXX TODO this must contain (and calculate in its constructor) the effect on the gamestate.
-// This includes:
-//  * Losing players' token loss
-//  * Honor gained by winning players' team
-pub struct Outcome {}
+#[derive(Debug)]
+pub struct Attack {
+    attackers: Vec<String>,
+    defenders: Vec<String>,
+    def_power: PowerType,
+    att_power: PowerType,
+}
+
+impl Attack {
+    pub fn apply(self, state: &mut ActiveGame) {
+        unimplemented!();
+    }
+}
 
 #[derive(Debug)]
 pub struct DeclaredAttack {
@@ -28,9 +38,13 @@ impl DeclaredAttack {
         AddDefender { attack }
     }
 
-    pub fn finalize(self) -> Outcome {
-        println!("Attack state when finalized: {:#?}", self);
-        unimplemented!();
+    pub fn finalize(self, att_power: PowerType) -> Attack {
+        Attack {
+            attackers: self.attackers,
+            defenders: self.defenders,
+            def_power: self.def_power,
+            att_power,
+        }
     }
 }
 
@@ -45,14 +59,17 @@ impl AddDefender {
         self
     }
     pub fn finalize_defense(self) -> AddAttacker {
+        let mut rng = rand::thread_rng();
         AddAttacker {
             attack: self.attack,
+            att_power: rng.gen(),
         }
     }
 }
 
 pub struct AddAttacker {
     attack: DeclaredAttack,
+    att_power: PowerType,
 }
 
 impl AddAttacker {
@@ -61,7 +78,7 @@ impl AddAttacker {
         self.attack.attackers.push(name.to_owned());
         self
     }
-    pub fn finalize_offense(self) -> Outcome {
-        self.attack.finalize()
+    pub fn finalize_offense(self) -> Attack {
+        self.attack.finalize(self.att_power)
     }
 }
