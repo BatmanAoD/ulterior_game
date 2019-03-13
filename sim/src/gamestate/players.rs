@@ -30,6 +30,7 @@ enum Role {
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 pub struct PName(String);
+// XXX Q: Can `PName` be constructed externally?
 
 #[derive(Debug)]
 pub struct Player {

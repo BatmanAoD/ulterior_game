@@ -103,11 +103,15 @@ pub struct AddDefender {
 }
 
 impl AddDefender {
-    pub fn add(mut self, name: &str) -> Self {
-        // TODO what to do if defender already exists?
+    pub fn add(mut self, name: &str) -> Result<Self, Self> {
+        // TODO If defender already exists, Err
         // TODO warn if defender is on attacker's team?
-        self.attack.defenders.push(name.to_owned());
-        self
+        if let Some(pname) = self.attack.state.get_pname(name) {
+            self.attack.defenders.push(pname.to_owned());
+            Ok(Self)
+        } else {
+            Err(self)
+        }
     }
     pub fn finalize_defense(self) -> AddAttacker {
         let mut rng = rand::thread_rng();
