@@ -8,30 +8,31 @@ fn main() {
 }
 
 #[test]
-fn dummy_game() {
-    let mut builder = gamestate::builder::Setup::new_game();
-    builder.add_team_or_panic("Geats");
-    builder.add_team_or_panic("Danes");
-
-    builder.add_player_or_panic("Kyle");
-    builder.add_player_or_panic("Laura");
-    builder.add_player_or_panic("Brandon");
-    builder.add_player_or_panic("Suzie");
-    builder.add_player_or_panic("Lauren");
-    builder.add_player_or_panic("Annabelle");
-    builder.add_player_or_panic("Aeris");
-    builder.add_player_or_panic("Rosie");
-    let mut game = builder.finalize().unwrap();
+fn dummy_game() -> Result<(), actions::attack::DummyError> {
+    let mut game = gamestate::builder::Setup::new_game()
+        .add_team_or_panic("Geats")
+        .add_team_or_panic("Danes")
+        .add_player_or_panic("Kyle")
+        .add_player_or_panic("Laura")
+        .add_player_or_panic("Brandon")
+        .add_player_or_panic("Suzie")
+        .add_player_or_panic("Lauren")
+        .add_player_or_panic("Annabelle")
+        .add_player_or_panic("Aeris")
+        .add_player_or_panic("Rosie")
+        .finalize().unwrap();
     println!("Start-of-game setup: {:#?}", &game);
 
     let attack = actions::attack::DeclaredAttack::declare(
-            "Kyle", "Brandon", gamestate::players::PowerType::Red)
-        .add("Laura")
-        .add("Annabelle")
+            &game, "Kyle", "Brandon", gamestate::players::PowerType::Red).unwrap()
+        .add_or_panic("Laura")
+        .add_or_panic("Annabelle")
         .finalize_defense()
-        .add("Suzie")
+        .add_or_panic("Suzie")
         .finalize_offense();
 
     println!("Attack: {:#?}", &attack);
     attack.apply(&mut game);
+
+    Ok(())
 }

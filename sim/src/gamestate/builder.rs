@@ -106,14 +106,16 @@ impl Setup {
         }
     }
 
-    pub fn add_team_or_panic(&mut self, name: &str) {
+    pub fn add_team_or_panic(&mut self, name: &str) -> &mut Self {
         self.add_team(name).unwrap();
         println!("Added team: {}", name);
+        &mut self
     }
 
-    pub fn add_player_or_panic(&mut self, name: &str) {
+    pub fn add_player_or_panic(&mut self, name: &str) -> &mut Self {
         self.add_player(name).unwrap();
         println!("Added player: {}", name);
+        &mut self
     }
 
     pub fn add_team(&mut self, name: &str) -> OptErr<AddTeamErr> {

@@ -6,5 +6,6 @@ authors = ["KJSTRAND"]
 
 [dependencies]
 itertools = "*"
+maplit = "1"
 rand = "*"
 rand_derive = "*"

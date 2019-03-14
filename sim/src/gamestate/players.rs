@@ -12,7 +12,7 @@ pub enum PowerType {
 }
 
 #[derive(Debug)]
-struct Power {
+pub struct Power {
     red: Option<i8>,
     blue: Option<i8>,
     green: Option<i8>,
@@ -22,15 +22,21 @@ struct Power {
 
 // TODO move to separate file
 #[derive(Debug)]
-enum Role {
+pub enum Role {
     Prophet { target: String },
     Traitor,
     // ...etc
 }
 
-#[derive(PartialEq, Eq, Hash, Clone, Debug)]
+#[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Debug)]
 pub struct PName(String);
 // XXX Q: Can `PName` be constructed externally?
+
+impl PartialEq<&str> for PName {
+    fn eq(&self, s: &&str) -> bool {
+        self.0 == *s
+    }
+}
 
 #[derive(Debug)]
 pub struct Player {

@@ -1,5 +1,7 @@
 use itertools::{Itertools, Either};
+use maplit::btreeset;
 use rand::Rng;
+use std::collections::BTreeSet;
 
 use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::PowerType;
@@ -9,8 +11,8 @@ use crate::gamestate::players::PName;
 
 #[derive(Debug)]
 pub struct Attack {
-    attackers: Vec<PName>,
-    defenders: Vec<PName>,
+    attackers: BTreeSet<PName>,
+    defenders: BTreeSet<PName>,
     def_power: PowerType,
     att_power: PowerType,
 }
@@ -19,21 +21,25 @@ impl Attack {
     fn determine_losers<'a>(self, state: &'a mut ActiveGame) -> (Vec<&'a mut Player>, PowerType) {
         // Q: Is there a way to do this categorization into *mutable* chunks in a way that will
         // satisfy the borrow checker?
-        let (mut attackers, others): (Vec<_>, Vec<_>) = state
+        let (attackers, mut others): (Vec<_>, Vec<_>) = state
             .players_mut()
             .partition_map(|p| {
                 if self.attackers.contains(&p.name) {
-                    Either::Left(&mut p)
+                    Either::Left(p)
                 } else {
-                    Either::Right(&mut p)
+                    Either::Right(p)
                 }
             });
-        let (mut defenders, others) = others.iter_mut()
+        let (defenders, _others): (Vec<&mut Player>, Vec<_>) = others.iter_mut()
+            // XXX Q: why does `partition_map` produce `&mut &mut _` values here?
+            // Attempting to manually dereference these with `*` doesn't work,
+            // apparently because that attempts to *copy* the `&mut`, which of
+            // course would be wrong.
             .partition_map(|p| {
                 if self.defenders.contains(&p.name) {
-                    Either::Left(&mut p)
+                    Either::Left(p)
                 } else {
-                    Either::Right(&mut p)
+                    Either::Right(p)
                 }
             });
         let attack_strength: i16 =
@@ -41,10 +47,6 @@ impl Attack {
             // Q: is explicit casting the right way to avoid overflow here?
             .map(|a| a.strength(self.att_power) as i16)
             .sum();
-        let mut defenders: Vec<&mut Player> = self.defenders.iter()
-            .map(
-                |p| state.find_player_mut(p))
-            .collect();
         let defense_strength: i16 =
             defenders.iter()
             .map(|d| d.strength(self.def_power) as i16)
@@ -66,26 +68,31 @@ impl Attack {
 }
 
 #[derive(Debug)]
-pub struct DeclaredAttack {
-    attackers: Vec<PName>,
-    defenders: Vec<PName>,
+pub struct DeclaredAttack<'a> {
+    attackers: BTreeSet<PName>,
+    defenders: BTreeSet<PName>,
     def_power: PowerType,
-    state: &ActiveGame,
+    state: &'a ActiveGame,
 }
 
-impl DeclaredAttack {
+impl<'a> DeclaredAttack<'a> {
     // Initiates an attack, returning a closure over the data necessary to perform the next step of the
     // attack.
     // TODO: instead of Option, use `Result` indicating which `str` wasn't found
-    pub fn declare(state: &ActiveGame, attacker: &str, defender: &str, def_power: PowerType) -> Option<AddDefender> {
-        let attack = DeclaredAttack {
-            attackers: vec![state.get_pname(attacker)?.to_owned()],
-            defenders: vec![state.get_pname(defender)?.to_owned()],
-            def_power,
-            state,
-        };
-
-        AddDefender { attack }
+    pub fn declare<'g>(
+        state: &'g ActiveGame,
+        attacker: &str,
+        defender: &str,
+        def_power: PowerType,
+    ) -> Option<AddDefender<'g>> {
+        Some(AddDefender {
+            attack: DeclaredAttack {
+                attackers: btreeset!{state.get_pname(attacker)?.to_owned()},
+                defenders: btreeset!{state.get_pname(defender)?.to_owned()},
+                def_power,
+                state,
+            }
+        })
     }
 
     pub fn finalize(self, att_power: PowerType) -> Attack {
@@ -98,22 +105,30 @@ impl DeclaredAttack {
     }
 }
 
-pub struct AddDefender {
-    attack: DeclaredAttack,
+pub struct AddDefender<'a> {
+    attack: DeclaredAttack<'a>,
 }
 
-impl AddDefender {
-    pub fn add(mut self, name: &str) -> Result<Self, Self> {
+#[derive(Debug)]
+pub struct DummyError {}    // XXX TEMP
+
+impl<'a> AddDefender<'a> {
+    pub fn add(mut self, name: &str) -> Result<bool, DummyError> {
         // TODO If defender already exists, Err
         // TODO warn if defender is on attacker's team?
         if let Some(pname) = self.attack.state.get_pname(name) {
-            self.attack.defenders.push(pname.to_owned());
-            Ok(Self)
+            Ok(self.attack.defenders.insert(pname.to_owned()))
         } else {
-            Err(self)
+            Err(DummyError{})
         }
     }
-    pub fn finalize_defense(self) -> AddAttacker {
+
+    pub fn add_or_panic(mut self, name: &str) -> &mut Self {
+        self.add(name).unwrap();
+        &mut self
+    }
+
+    pub fn finalize_defense(self) -> AddAttacker<'a> {
         let mut rng = rand::thread_rng();
         AddAttacker {
             attack: self.attack,
@@ -122,19 +137,28 @@ impl AddDefender {
     }
 }
 
-pub struct AddAttacker {
-    attack: DeclaredAttack,
+pub struct AddAttacker<'a> {
+    attack: DeclaredAttack<'a>,
     att_power: PowerType,
 }
 
-impl AddAttacker {
-    pub fn add(mut self, name: &str) -> Self {
+impl<'a> AddAttacker<'a> {
+    pub fn add(mut self, name: &str) -> Result<bool, DummyError> {
         // TODO what to do if attacker already exists?
         // TODO what to do if attacker is on `defenders` list?
         // TODO warn if attacker is on defender's team?
-        self.attack.attackers.push(name.to_owned());
-        self
+        if let Some(pname) = self.attack.state.get_pname(name) {
+            Ok(self.attack.attackers.insert(pname.to_owned()))
+        } else {
+            Err(DummyError{})
+        }
     }
+
+    pub fn add_or_panic(mut self, name: &str) -> &mut Self {
+        self.add(name).unwrap();
+        &mut self
+    }
+
     pub fn finalize_offense(self) -> Attack {
         self.attack.finalize(self.att_power)
     }
