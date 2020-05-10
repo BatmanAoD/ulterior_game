@@ -1,8 +1,9 @@
-use rand_derive::Rand;
 use std::collections::HashMap;
+use std::ops::{Index,IndexMut};
 
 use rand;
 use rand::distributions::{Distribution, Range};
+use rand_derive::Rand;
 
 #[derive(Copy, Clone, Debug, Rand)]
 pub enum PowerType {
@@ -13,12 +14,40 @@ pub enum PowerType {
 
 #[derive(Copy, Clone, Debug)]
 pub struct Power {
-    red: Option<i8>,
-    blue: Option<i8>,
-    green: Option<i8>,
+    red: ColorPower,
+    blue: ColorPower,
+    green: ColorPower,
 }
 
-// Impl `Index` and `IndexMut` for `Power` using `PowerType`
+#[derive(Copy, Clone, Debug)]
+struct ColorPower (Option<i8>);
+
+impl From<&ColorPower> for i8 {
+    fn from(cp: &ColorPower) -> Self {
+        cp.0.unwrap_or(0)
+    }
+}
+
+impl Index<PowerType> for Power {
+    type Output = ColorPower;
+    fn index(&self, ptype: PowerType) -> &ColorPower {
+        match ptype {
+            PowerType::Red => &self.red,
+            PowerType::Blue => &self.blue,
+            PowerType::Green => &self.green,
+        }
+    }
+}
+
+impl IndexMut<PowerType> for Power {
+    fn index_mut(&mut self, ptype: PowerType) -> &mut Self::Output {
+        match ptype {
+            PowerType::Red => &mut self.red,
+            PowerType::Blue => &mut self.blue,
+            PowerType::Green => &mut self.green,
+        }
+    }
+}
 
 // TODO move to separate file
 #[derive(Debug)]
@@ -85,8 +114,7 @@ impl Player {
     }
 
     pub fn strength(&self, ptype: PowerType) -> i8 {
-        // Use `<Power as Index>`, to be implemented above
-        unimplemented!();
+        self.power[ptype].into()
     }
 
     pub fn lose_power(&mut self, ptype: PowerType) {
