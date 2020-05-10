@@ -40,9 +40,9 @@ impl Attack {
             (attackers, self.att_power)
         }
     }
-    pub fn apply(self, state: &mut ActiveGame) {
-        let (losers, p_type) = self.determine_losers(&mut state);
-        for loser in losers.iter() {
+    pub fn apply(self, mut state: &mut ActiveGame) {
+        let (mut losers, p_type) = self.determine_losers(&mut state);
+        for loser in losers.iter_mut() {
             loser.lose_power(p_type);
             // XXX TODO: winning players should win honor!
             unimplemented!();
@@ -96,7 +96,7 @@ pub struct AddDefender<'a> {
 pub struct DummyError {}    // XXX TEMP
 
 impl<'a> AddDefender<'a> {
-    pub fn add(mut self, name: &str) -> Result<bool, DummyError> {
+    pub fn add(&mut self, name: &str) -> Result<bool, DummyError> {
         // TODO If defender already exists, Err
         // TODO warn if defender is on attacker's team?
         if let Some(pname) = self.attack.state.get_pname(name) {
@@ -106,9 +106,9 @@ impl<'a> AddDefender<'a> {
         }
     }
 
-    pub fn add_or_panic(mut self, name: &str) -> &mut Self {
+    pub fn add_or_panic(&mut self, name: &str) -> &mut Self {
         self.add(name).unwrap();
-        &mut self
+        self
     }
 
     pub fn finalize_defense(self) -> AddAttacker<'a> {
@@ -137,9 +137,9 @@ impl<'a> AddAttacker<'a> {
         }
     }
 
-    pub fn add_or_panic(mut self, name: &str) -> &mut Self {
+    pub fn add_or_panic(&mut self, name: &str) -> &mut Self {
         self.add(name).unwrap();
-        &mut self
+        self
     }
 
     pub fn finalize_offense(self) -> Attack {

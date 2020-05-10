@@ -11,7 +11,7 @@ pub enum PowerType {
     Green,
 }
 
-#[derive(Debug)]
+#[derive(Copy, Clone, Debug)]
 pub struct Power {
     red: Option<i8>,
     blue: Option<i8>,
