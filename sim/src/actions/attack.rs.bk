@@ -1,6 +1,0 @@
-use gamestate::players::PowerType;
-use gamestate::teams;
-
-struct Attack {}
-
-fn StartAttack(attacker: &str, defender: &str, def_power: PowerType) -> Attack {}
