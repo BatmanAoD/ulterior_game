@@ -18,11 +18,11 @@ pub struct Attack {
 
 impl Attack {
     fn determine_losers<'a>(self, state: &'a mut ActiveGame) -> (Vec<&'a mut Player>, PowerType) {
-        let (attackers, mut others): (Vec<_>, Vec<_>) = state
+        let (attackers, others): (Vec<_>, Vec<_>) = state
             .players_mut()
             .partition(|p| self.attackers.contains(&p.name));
-        let defenders: Vec<&mut Player> = others
-            .iter_mut()
+        let defenders: Vec<_> = others
+            .into_iter()    // We move the existing `&mut`s rather than taking `&mut &mut`
             .filter(|p| self.defenders.contains(&p.name))
             .collect();
         let attack_strength: i16 =

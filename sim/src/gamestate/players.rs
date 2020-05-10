@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use rand;
 use rand::distributions::{Distribution, Range};
 
-#[derive(Debug, Rand)]
+#[derive(Copy, Clone, Debug, Rand)]
 pub enum PowerType {
     Red,
     Blue,
