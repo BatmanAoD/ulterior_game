@@ -1,4 +1,3 @@
-use itertools::{Itertools, Either};
 use maplit::btreeset;
 use rand::Rng;
 use std::collections::BTreeSet;
@@ -19,29 +18,13 @@ pub struct Attack {
 
 impl Attack {
     fn determine_losers<'a>(self, state: &'a mut ActiveGame) -> (Vec<&'a mut Player>, PowerType) {
-        // Q: Is there a way to do this categorization into *mutable* chunks in a way that will
-        // satisfy the borrow checker?
         let (attackers, mut others): (Vec<_>, Vec<_>) = state
             .players_mut()
-            .partition_map(|p| {
-                if self.attackers.contains(&p.name) {
-                    Either::Left(p)
-                } else {
-                    Either::Right(p)
-                }
-            });
-        let (defenders, _others): (Vec<&mut Player>, Vec<_>) = others.iter_mut()
-            // XXX Q: why does `partition_map` produce `&mut &mut _` values here?
-            // Attempting to manually dereference these with `*` doesn't work,
-            // apparently because that attempts to *copy* the `&mut`, which of
-            // course would be wrong.
-            .partition_map(|p| {
-                if self.defenders.contains(&p.name) {
-                    Either::Left(p)
-                } else {
-                    Either::Right(p)
-                }
-            });
+            .partition(|p| self.attackers.contains(&p.name));
+        let defenders: Vec<&mut Player> = others
+            .iter_mut()
+            .filter(|p| self.defenders.contains(&p.name))
+            .collect();
         let attack_strength: i16 =
             attackers.iter()
             // Q: is explicit casting the right way to avoid overflow here?
