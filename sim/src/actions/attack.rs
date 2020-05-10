@@ -106,7 +106,7 @@ impl<'a> AddDefender<'a> {
         }
     }
 
-    pub fn add_or_panic(&mut self, name: &str) -> &mut Self {
+    pub fn add_or_panic(mut self, name: &str) -> Self {
         self.add(name).unwrap();
         self
     }
@@ -137,7 +137,7 @@ impl<'a> AddAttacker<'a> {
         }
     }
 
-    pub fn add_or_panic(&mut self, name: &str) -> &mut Self {
+    pub fn add_or_panic(mut self, name: &str) -> Self {
         self.add(name).unwrap();
         self
     }
