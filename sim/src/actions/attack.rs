@@ -126,7 +126,7 @@ pub struct AddAttacker<'a> {
 }
 
 impl<'a> AddAttacker<'a> {
-    pub fn add(mut self, name: &str) -> Result<bool, DummyError> {
+    pub fn add(&mut self, name: &str) -> Result<bool, DummyError> {
         // TODO what to do if attacker already exists?
         // TODO what to do if attacker is on `defenders` list?
         // TODO warn if attacker is on defender's team?
