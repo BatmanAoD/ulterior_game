@@ -18,7 +18,7 @@ fn dummy_game() -> Result<(), actions::attack::DummyError> {
         .add_player_or_panic("Suzie")
         .add_player_or_panic("Lauren")
         .add_player_or_panic("Annabelle")
-        .add_player_or_panic("Aeris")
+        .add_player_or_panic("Luna")
         .add_player_or_panic("Rosie")
         .finalize().unwrap();
     println!("Start-of-game setup: {:#?}", &game);

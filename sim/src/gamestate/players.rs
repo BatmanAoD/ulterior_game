@@ -81,21 +81,15 @@ impl PartialEq<&str> for PName {
 pub struct Player {
     pub name: PName,
     pub team: String,
-    // TODO replace 'public' field with misc accessor functions
-    // and the 'fight' functionality (which will mutate by switching from
-    // 'some' to 'none' if the player loses)
-    pub power: Power,
-    // TODO replace 'public' field with accessor functions (roles are NEVER
-    // changed; they are ONLY used to (1) impact player behavior and (2)
-    // determine victory conditions)
-    pub role: Option<Box<Role>>,
+    // Power is only visible with `Player::strength` and modifiable with
+    // `Player::lose_power`
+    power: Power,
+    // Roles are NEVER changed; they are ONLY used to (1) impact player behavior
+    // and (2) determine victory conditions
+    role: Option<Box<Role>>,
 }
 
 impl Player {
-    // TODO randomly assign team
-    // (NOTE: Need to CHANGE PlayersByName to require a *complete* list of players all at once. To
-    // facilitate this, it would probably be best to have a "GameBuilder" class somewhere that
-    // would validate input, construct the full player list, permit setting team names, etc.)
     // Q: Better to take String as arg, or &str?
     pub fn new(name: &str, team: &str) -> Player {
         // Q: Can I avoid re-creating these each time? (Not sure it matters, but still.) Neither
@@ -103,7 +97,7 @@ impl Player {
         let mut rng = rand::thread_rng();
         let power_range: Range<i8> = Range::new(1, 6);
         Player {
-            // Q: typname-initialization syntax versus non-typename struct initialization seems
+            // Q: typename-initialization syntax versus non-typename struct initialization seems
             // inconsistent. Why not either `{}` or `()` uniformly?
             // A?: Something about tuples vs structs...? Does that really matter?
             // Q: Why can't initialization just infer that I want all my `&str`s to become

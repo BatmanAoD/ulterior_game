@@ -128,7 +128,6 @@ impl Setup {
                 if already_exists {
                     return Err(AddTeamErr::TeamAlreadyExists);
                 }
-                // Q: seriously?
                 Ok(())
             }
         }
