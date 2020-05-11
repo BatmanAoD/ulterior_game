@@ -33,6 +33,7 @@ fn dummy_game() -> Result<(), actions::attack::DummyError> {
 
     println!("Attack: {:#?}", &attack);
     attack.apply(&mut game);
+    println!("After attack resolves: {:#?}", &game);
 
     Ok(())
 }

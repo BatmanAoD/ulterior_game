@@ -45,7 +45,7 @@ impl Attack {
         for loser in losers.into_iter() {
             loser.lose_power(p_type);
             // XXX TODO: winning players should win honor!
-            unimplemented!();
+            // unimplemented!();
         }
     }
 }
