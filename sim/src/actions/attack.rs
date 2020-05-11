@@ -25,6 +25,8 @@ impl Attack {
             .into_iter()    // We move the existing `&mut`s rather than taking `&mut &mut`
             .filter(|p| self.defenders.contains(&p.name))
             .collect();
+        // XXX TODO bonus for team with a color advantage (rock-paper-scissors style)
+        // Bonus amount? Try +2
         let attack_strength: i16 =
             attackers.iter()
             // Q: is explicit casting the right way to avoid overflow here?
@@ -45,7 +47,9 @@ impl Attack {
         for loser in losers.into_iter() {
             loser.lose_power(p_type);
             // XXX TODO: winning players should win honor!
-            // unimplemented!();
+            // Honor goes to the winning *team* (not to individual combatants)
+            // Honor amount = sum of power of tokens lost by losing team
+            unimplemented!();
         }
     }
 }
