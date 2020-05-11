@@ -68,8 +68,8 @@ pub enum Role {
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Debug)]
-pub struct PName(String);
 // XXX Q: Can `PName` be constructed externally?
+pub struct PName(String);
 
 impl PartialEq<&str> for PName {
     fn eq(&self, s: &&str) -> bool {
@@ -135,6 +135,12 @@ impl PlayersByName {
         // Q: Some way to insert using the hash directly instead of cloning the string first, since
         // the actual string isn't really necessary?
         self.0.insert(p.name.clone(), p);
+    }
+    pub fn find_ref(&self, name: &PName) -> Option<&Player> {
+        self.0.get(name)
+    }
+    pub fn find_mut(&mut self, name: &PName) -> Option<&mut Player> {
+        self.0.get_mut(name)
     }
     pub fn iter(&self) -> impl Iterator<Item = &Player> {
         self.0.values()

@@ -14,15 +14,27 @@ impl TeamsByName {
     }
 
     pub fn add(&mut self, t: &str, p: players::PlayersByName) {
-        self.0.insert(TName(String::from(t)), p);
+        if let Some(_) = self.0.insert(TName(String::from(t)), p) {
+            panic!("Team name added twice: {}", t)
+        }
     }
 
-    pub fn find_player<'a, 'b>(&'a self, player: &'b players::PName) -> &'a players::Player {
-        unimplemented!();
+    pub fn find_player<'a, 'b>(&'a self, name: &'b players::PName) -> &'a players::Player {
+        for (_team, players) in &self.0 {
+            if let Some(player) = players.find_ref(name) {
+                return player
+            }
+        }
+        panic!("Could not find player {:?}", name);
     }
 
-    pub fn find_player_mut<'a, 'b>(&'a mut self, player: &'b players::PName) -> &'a mut players::Player {
-        unimplemented!();
+    pub fn find_player_mut<'a, 'b>(&'a mut self, name: &'b players::PName) -> &'a mut players::Player {
+        for (_team, players) in &mut self.0 {
+            if let Some(player) = players.find_mut(name) {
+                return player
+            }
+        }
+        panic!("Could not find player {:?}", name);
     }
 
     pub fn players(&self) -> impl Iterator<Item = &players::Player> {
