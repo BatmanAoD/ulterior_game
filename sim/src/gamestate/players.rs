@@ -19,11 +19,21 @@ pub struct Power {
     green: ColorPower,
 }
 
-#[derive(Copy, Clone, Debug)]
-struct ColorPower (Option<i8>);
+impl Power {
+    fn randomize(power_range: &Range<i8>, mut rng: &mut rand::ThreadRng) -> Self {
+        Power {
+            red: ColorPower(Some(power_range.sample(&mut rng))),
+            green: ColorPower(Some(power_range.sample(&mut rng))),
+            blue: ColorPower(Some(power_range.sample(&mut rng))),
+        }
+    }
+}
 
-impl From<&ColorPower> for i8 {
-    fn from(cp: &ColorPower) -> Self {
+#[derive(Copy, Clone, Debug)]
+pub struct ColorPower (Option<i8>);
+
+impl From<ColorPower> for i8 {
+    fn from(cp: ColorPower) -> Self {
         cp.0.unwrap_or(0)
     }
 }
@@ -104,11 +114,7 @@ impl Player {
             // not just `power: { ....`
             // A?: This inference isn't worthwhile to implement because it would break with
             // function overloading.
-            power: Power {
-                red: Some(power_range.sample(&mut rng)),
-                blue: Some(power_range.sample(&mut rng)),
-                green: Some(power_range.sample(&mut rng)),
-            },
+            power: Power::randomize(&power_range, &mut rng),
             role: None,
         }
     }
