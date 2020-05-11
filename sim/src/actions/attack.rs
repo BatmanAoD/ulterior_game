@@ -41,8 +41,8 @@ impl Attack {
         }
     }
     pub fn apply(self, mut state: &mut ActiveGame) {
-        let (mut losers, p_type) = self.determine_losers(&mut state);
-        for loser in losers.iter_mut() {
+        let (losers, p_type) = self.determine_losers(&mut state);
+        for loser in losers.into_iter() {
             loser.lose_power(p_type);
             // XXX TODO: winning players should win honor!
             unimplemented!();

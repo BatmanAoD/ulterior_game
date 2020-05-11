@@ -124,8 +124,7 @@ impl Player {
     }
 
     pub fn lose_power(&mut self, ptype: PowerType) {
-        // Use `<Power as IndexMut>`, to be implemented above
-        unimplemented!();
+        self.power[ptype] = ColorPower(None)
     }
 }
 
