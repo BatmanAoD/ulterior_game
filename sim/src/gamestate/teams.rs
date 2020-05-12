@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::gamestate::players::{Player, PlayersByName, PName};
+use crate::gamestate::players::{PName, Player, PlayersByName};
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 // TODO Like PName, the intent was to make the inner `String` private and
@@ -26,7 +26,10 @@ impl TeamsByName {
     }
 
     pub fn add(&mut self, t: &str, players: PlayersByName) {
-        if let Some(_) = self.0.insert(TName(String::from(t)), Team{players, honor: 0}) {
+        if let Some(_) = self
+            .0
+            .insert(TName(String::from(t)), Team { players, honor: 0 })
+        {
             panic!("Team name added twice: {}", t)
         }
     }
@@ -44,7 +47,7 @@ impl TeamsByName {
     pub fn find_player(&self, name: &PName) -> &Player {
         for (_team, team) in &self.0 {
             if let Some(player) = team.players.find_ref(name) {
-                return player
+                return player;
             }
         }
         panic!("Could not find player {:?}", name);
@@ -53,7 +56,7 @@ impl TeamsByName {
     pub fn find_player_mut(&mut self, name: &PName) -> &mut Player {
         for (_team, team) in &mut self.0 {
             if let Some(player) = team.players.find_mut(name) {
-                return player
+                return player;
             }
         }
         panic!("Could not find player {:?}", name);
@@ -64,6 +67,8 @@ impl TeamsByName {
     }
 
     pub fn players_mut(&mut self) -> impl Iterator<Item = &mut Player> {
-        self.0.iter_mut().flat_map(|(_, team)| team.players.iter_mut())
+        self.0
+            .iter_mut()
+            .flat_map(|(_, team)| team.players.iter_mut())
     }
 }

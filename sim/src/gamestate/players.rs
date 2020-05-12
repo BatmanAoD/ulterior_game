@@ -1,5 +1,5 @@
 use std::collections::HashMap;
-use std::ops::{Index,IndexMut};
+use std::ops::{Index, IndexMut};
 
 use rand;
 use rand::distributions::{Distribution, Range};
@@ -28,7 +28,10 @@ impl PowerType {
             0 => 0,
             1 | -2 => 1,
             2 | -1 => -1,
-            _ => panic!("Invalid 'PowerType' values: {}, {}", self as i16, against as i16),
+            _ => panic!(
+                "Invalid 'PowerType' values: {}, {}",
+                self as i16, against as i16
+            ),
         }
     }
 }
@@ -51,7 +54,7 @@ impl Power {
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct ColorPower (Option<i8>);
+pub struct ColorPower(Option<i8>);
 
 impl From<ColorPower> for i8 {
     fn from(cp: ColorPower) -> Self {
@@ -104,7 +107,7 @@ impl PartialEq<&str> for PName {
 #[derive(Debug)]
 pub struct Player {
     pub name: PName,
-    pub team: String,   // TODO should be TName
+    pub team: String, // TODO should be TName
     // Power is only visible with `Player::strength` and modifiable with
     // `Player::lose_power`
     power: Power,

@@ -20,16 +20,22 @@ fn dummy_game() -> Result<(), actions::attack::DummyError> {
         .add_player_or_panic("Annabelle")
         .add_player_or_panic("Luna")
         .add_player_or_panic("Rosie")
-        .finalize().unwrap();
+        .finalize()
+        .unwrap();
     println!("Start-of-game setup: {:#?}", &game);
 
     let attack = actions::attack::DeclaredAttack::declare(
-            &game, "Kyle", "Brandon", gamestate::players::PowerType::Red).unwrap()
-        .add_or_panic("Laura")
-        .add_or_panic("Annabelle")
-        .finalize_defense()
-        .add_or_panic("Suzie")
-        .finalize_offense();
+        &game,
+        "Kyle",
+        "Brandon",
+        gamestate::players::PowerType::Red,
+    )
+    .unwrap()
+    .add_or_panic("Laura")
+    .add_or_panic("Annabelle")
+    .finalize_defense()
+    .add_or_panic("Suzie")
+    .finalize_offense();
 
     println!("Attack: {:#?}", &attack);
     attack.apply(&mut game);

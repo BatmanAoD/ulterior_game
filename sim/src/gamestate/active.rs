@@ -1,5 +1,5 @@
-use crate::gamestate::teams::{TeamsByName, TName};
-use crate::gamestate::players::{Player, PName};
+use crate::gamestate::players::{PName, Player};
+use crate::gamestate::teams::{TName, TeamsByName};
 
 #[derive(Debug)]
 pub struct ActiveGame {
@@ -8,7 +8,9 @@ pub struct ActiveGame {
 
 impl ActiveGame {
     pub fn player_by_name(&self, name: &str) -> Option<(PName, TName)> {
-        self.players().find(|p| p.name == name).map(|p| (p.name.to_owned(), TName(p.team.to_owned())))
+        self.players()
+            .find(|p| p.name == name)
+            .map(|p| (p.name.to_owned(), TName(p.team.to_owned())))
     }
 
     pub fn find_player(&self, player: &PName) -> &Player {
