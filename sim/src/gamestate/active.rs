@@ -13,6 +13,7 @@ impl ActiveGame {
             .map(|p| (p.name.to_owned(), TName(p.team.to_owned())))
     }
 
+    /*  TODO - do I need these?
     pub fn find_player(&self, player: &PName) -> &Player {
         self.teams.find_player(player)
     }
@@ -20,6 +21,7 @@ impl ActiveGame {
     pub fn find_player_mut(&mut self, player: &PName) -> &mut Player {
         self.teams.find_player_mut(player)
     }
+    */
 
     pub fn players(&self) -> impl Iterator<Item = &Player> {
         self.teams.players()

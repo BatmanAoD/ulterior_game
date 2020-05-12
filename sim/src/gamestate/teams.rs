@@ -40,6 +40,7 @@ impl TeamsByName {
         self.0.get_mut(t).expect("Team not found").honor += honor
     }
 
+    /* TODO - do I need these?
     // PName should only be constructed from a *known* player, which is why this method
     // doesn't return an `Option`.
     // TODO: Change this. `PName` doesn't actually have the type-safety
@@ -61,6 +62,7 @@ impl TeamsByName {
         }
         panic!("Could not find player {:?}", name);
     }
+    */
 
     pub fn players(&self) -> impl Iterator<Item = &Player> {
         self.0.iter().flat_map(|(_, team)| team.players.iter())

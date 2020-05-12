@@ -149,8 +149,6 @@ impl Player {
     }
 }
 
-// Apparently the Rust standard library currently doesn't provide any hashers other than SipHasher,
-// so we can't specify a faster one here.
 #[derive(Debug)]
 pub struct PlayersByName(HashMap<PName, Player>);
 
@@ -163,12 +161,14 @@ impl PlayersByName {
         // the actual string isn't really necessary?
         self.0.insert(p.name.clone(), p);
     }
+    /* TODO - do I need these?
     pub fn find_ref(&self, name: &PName) -> Option<&Player> {
         self.0.get(name)
     }
     pub fn find_mut(&mut self, name: &PName) -> Option<&mut Player> {
         self.0.get_mut(name)
     }
+    */
     pub fn iter(&self) -> impl Iterator<Item = &Player> {
         self.0.values()
     }
