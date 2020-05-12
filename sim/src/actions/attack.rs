@@ -31,7 +31,7 @@ struct CombatantRefs<'a> {
 impl<'a> CombatantRefs<'a> {
     fn strength(&self) -> i16 {
         self.players.iter()
-            // Q: is explicit casting the right way to avoid overflow here?
+            // Q: is explicit casting a reasonable way to avoid overflow here?
             .map(|a| a.strength(self.power_type) as i16)
             .sum()
     }
