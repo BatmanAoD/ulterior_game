@@ -104,7 +104,7 @@ impl PartialEq<&str> for PName {
 #[derive(Debug)]
 pub struct Player {
     pub name: PName,
-    pub team: String,   // XXX TODO should be TName
+    pub team: String,   // TODO should be TName
     // Power is only visible with `Player::strength` and modifiable with
     // `Player::lose_power`
     power: Power,

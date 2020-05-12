@@ -96,7 +96,7 @@ pub struct DeclaredAttack<'a> {
 impl<'a> DeclaredAttack<'a> {
     // Initiates an attack, returning a closure over the data necessary to perform the next step of the
     // attack.
-    // XXX TODO: instead of Option, use `Result` indicating which `str` wasn't found
+    // XXX: instead of Option, use `Result` indicating which `str` wasn't found
     // TODO DESIGN: Let attacker declare which team they're fighting for?
     pub fn declare<'g>(
         state: &'g ActiveGame,
@@ -104,7 +104,7 @@ impl<'a> DeclaredAttack<'a> {
         defender: &str,
         def_power: PowerType,
     ) -> Option<AddDefender<'g>> {
-        // XXX TODO these *panic* if the player cannot be found. Add '?' when
+        // XXX these *panic* if the player cannot be found. Add '?' when
         // proper error-handling has been added.
         let (attacker_name, att_team) = state.player_by_name(attacker)?;
         let (defender_name, def_team) = state.player_by_name(attacker)?;
@@ -140,7 +140,7 @@ impl<'a> AddDefender<'a> {
         // TODO If defender already exists, Err
         // TODO warn if defender is on attacker's team?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
-            Ok(self.attack.defenders.insert(pname.to_owned()))
+            Ok(self.attack.defenders.insert(pname))
         } else {
             Err(DummyError{})
         }
