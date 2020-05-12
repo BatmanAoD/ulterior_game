@@ -11,11 +11,11 @@ impl ActiveGame {
         self.players().find(|p| p.name == name).map(|p| (p.name.to_owned(), TName(p.team.to_owned())))
     }
 
-    pub fn find_player<'a, 'b>(&'a self, player: &'b PName) -> &'a Player {
+    pub fn find_player(&self, player: &PName) -> &Player {
         self.teams.find_player(player)
     }
 
-    pub fn find_player_mut<'a, 'b>(&'a mut self, player: &'b PName) -> &'a mut Player {
+    pub fn find_player_mut(&mut self, player: &PName) -> &mut Player {
         self.teams.find_player_mut(player)
     }
 

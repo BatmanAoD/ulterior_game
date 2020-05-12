@@ -38,6 +38,11 @@ impl<'a> CombatantRefs<'a> {
 }
 
 impl Attack {
+    // TODO: It would be nice to split this into a pure function, `outcome`, and
+    // a method on the output of that function, `apply`, that would actually
+    // perform the operation. This would permit "previewing" the results of the attack.
+    // However, since `state` is borrowed to construct `combatants_by_ref`, this
+    // might not be possible as-is.
     pub fn apply(self, state: &mut ActiveGame) {
         let (attackers, defenders) = self.combatants_by_ref(state);
         let attack_strength = attackers.strength();

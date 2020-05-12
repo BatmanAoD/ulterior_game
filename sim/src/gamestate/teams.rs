@@ -34,7 +34,7 @@ impl TeamsByName {
     // doesn't return an `Option`.
     // XXX TODO: Change this. `PName` doesn't actually have the type-safety
     // that it would need for such a guarantee.
-    pub fn find_player<'a, 'b>(&'a self, name: &'b players::PName) -> &'a players::Player {
+    pub fn find_player(&self, name: &players::PName) -> &players::Player {
         for (_team, players) in &self.0 {
             if let Some(player) = players.find_ref(name) {
                 return player
@@ -43,7 +43,7 @@ impl TeamsByName {
         panic!("Could not find player {:?}", name);
     }
 
-    pub fn find_player_mut<'a, 'b>(&'a mut self, name: &'b players::PName) -> &'a mut players::Player {
+    pub fn find_player_mut(&mut self, name: &players::PName) -> &mut players::Player {
         for (_team, players) in &mut self.0 {
             if let Some(player) = players.find_mut(name) {
                 return player
