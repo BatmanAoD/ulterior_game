@@ -65,7 +65,7 @@ impl Setup {
     }
 
     pub fn finalize(self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
-        // XXX TODO min number of players?
+        // TODO DESIGN min number of players?
         if self.player_names.len() < self.team_set.len() * 3 {
             return Err(StartGameErr::TooFewPlayers);
         }

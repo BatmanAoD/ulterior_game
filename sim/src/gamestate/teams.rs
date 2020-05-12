@@ -3,9 +3,10 @@ use std::collections::HashMap;
 use crate::gamestate::players;
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-struct TName(String);
+pub struct TName(String);
 
 #[derive(Debug)]
+// XXX TODO teams need to track honor
 pub struct TeamsByName(HashMap<TName, players::PlayersByName>);
 
 impl TeamsByName {
@@ -17,6 +18,10 @@ impl TeamsByName {
         if let Some(_) = self.0.insert(TName(String::from(t)), p) {
             panic!("Team name added twice: {}", t)
         }
+    }
+
+    pub fn gain_honor(&mut self, t: &TName, honor: i16) {
+        unimplemented!()
     }
 
     pub fn find_player<'a, 'b>(&'a self, name: &'b players::PName) -> &'a players::Player {

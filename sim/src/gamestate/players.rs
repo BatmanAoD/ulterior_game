@@ -7,9 +7,30 @@ use rand_derive::Rand;
 
 #[derive(Copy, Clone, Debug, Rand)]
 pub enum PowerType {
-    Red,
-    Blue,
-    Green,
+    Red = 0,
+    Blue = 1,
+    Green = 2,
+}
+
+// TODO DESIGN relative color advantage?
+const POWER_ADVANTAGE_MULTIPLYER: i16 = 2;
+
+impl PowerType {
+    // May be negative
+    pub fn relative_advantage(self, against: PowerType) -> i16 {
+        self.unit_advantage(against) * POWER_ADVANTAGE_MULTIPLYER
+    }
+
+    fn unit_advantage(self, against: PowerType) -> i16 {
+        // Q: Is there some clever arithmetic I could do here instead of `match`?
+        match self as i16 - against as i16 {
+            // Red beats Green, Green beats Blue, Blue beats Red
+            0 => 0,
+            1 | -2 => 1,
+            2 | -1 => -1,
+            _ => panic!("Invalid 'PowerType' values: {}, {}", self as i16, against as i16),
+        }
+    }
 }
 
 #[derive(Copy, Clone, Debug)]
@@ -80,7 +101,7 @@ impl PartialEq<&str> for PName {
 #[derive(Debug)]
 pub struct Player {
     pub name: PName,
-    pub team: String,
+    pub team: String,   // XXX TODO should be TName
     // Power is only visible with `Player::strength` and modifiable with
     // `Player::lose_power`
     power: Power,

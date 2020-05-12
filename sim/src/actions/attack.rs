@@ -6,58 +6,101 @@ use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::PowerType;
 use crate::gamestate::players::Player;
 use crate::gamestate::players::PName;
+use crate::gamestate::teams::TName;
 // use crate::gamestate::teams;
 
 #[derive(Debug)]
 pub struct Attack {
-    attackers: BTreeSet<PName>,
-    defenders: BTreeSet<PName>,
-    def_power: PowerType,
-    att_power: PowerType,
+    attackers: NamedCombatants,
+    defenders: NamedCombatants,
+}
+
+#[derive(Debug)]
+struct NamedCombatants {
+    names: BTreeSet<PName>,
+    power_type: PowerType,
+    for_team: TName,
+}
+
+#[derive(Debug)]
+struct CombatantRefs<'a> {
+    players: Vec<&'a mut Player>,
+    power_type: PowerType,
+}
+
+impl<'a> CombatantRefs<'a> {
+    fn strength(&self) -> i16 {
+        self.players.iter()
+            // Q: is explicit casting the right way to avoid overflow here?
+            .map(|a| a.strength(self.power_type) as i16)
+            .sum()
+    }
+}
+
+#[derive(Debug)]
+struct AttackOutcome<'a> {
+    state: &'a mut ActiveGame,
+    losers: CombatantRefs<'a>,
+    winning_team: TName,
+    honor_won: i16,
+}
+
+impl<'a> AttackOutcome<'a> {
+    fn apply(self) {
+        for loser in self.losers.players.into_iter() {
+            loser.lose_power(self.losers.power_type);
+        }
+        self.state.teams.gain_honor(&self.winning_team, self.honor_won)
+    }
 }
 
 impl Attack {
-    fn determine_losers<'a>(self, state: &'a mut ActiveGame) -> (Vec<&'a mut Player>, PowerType) {
+    pub fn apply(self, state: &mut ActiveGame) {
+        let outcome = self.outcome(state).apply();
+    }
+    fn outcome<'a>(self, state: &'a mut ActiveGame) -> AttackOutcome<'a> {
+        let (attackers, defenders) = self.combatants_by_ref(state);
+        let attack_strength = attackers.strength();
+        let defense_strength = defenders.strength();
+        let attack_succeeds = attack_strength + self.attack_bonus() > defense_strength;
+        let losers: CombatantRefs<'a>;
+        let winning_team: TName;
+        let honor_won: i16;
+        if attack_succeeds {
+            losers = defenders;
+            winning_team = self.attackers.for_team;
+            honor_won = defense_strength;
+        } else {
+            losers = attackers;
+            winning_team = self.defenders.for_team;
+            honor_won = attack_strength;
+        }
+        AttackOutcome { state, losers, winning_team, honor_won }
+    }
+    fn combatants_by_ref<'a>(&self, state: &'a mut ActiveGame) -> (CombatantRefs<'a>, CombatantRefs<'a>) {
         let (attackers, others): (Vec<_>, Vec<_>) = state
             .players_mut()
-            .partition(|p| self.attackers.contains(&p.name));
+            .partition(|p| self.attackers.names.contains(&p.name));
         let defenders: Vec<_> = others
             .into_iter()    // We move the existing `&mut`s rather than taking `&mut &mut`
-            .filter(|p| self.defenders.contains(&p.name))
+            .filter(|p| self.defenders.names.contains(&p.name))
             .collect();
-        // XXX TODO bonus for team with a color advantage (rock-paper-scissors style)
-        // Bonus amount? Try +2
-        let attack_strength: i16 =
-            attackers.iter()
-            // Q: is explicit casting the right way to avoid overflow here?
-            .map(|a| a.strength(self.att_power) as i16)
-            .sum();
-        let defense_strength: i16 =
-            defenders.iter()
-            .map(|d| d.strength(self.def_power) as i16)
-            .sum();
-        if attack_strength > defense_strength {
-            (defenders, self.def_power)
-        } else {
-            (attackers, self.att_power)
-        }
+        (
+            CombatantRefs{ players: attackers, power_type: self.attackers.power_type},
+            CombatantRefs{ players: defenders, power_type: self.defenders.power_type},
+        )
     }
-    pub fn apply(self, mut state: &mut ActiveGame) {
-        let (losers, p_type) = self.determine_losers(&mut state);
-        for loser in losers.into_iter() {
-            loser.lose_power(p_type);
-            // XXX TODO: winning players should win honor!
-            // Honor goes to the winning *team* (not to individual combatants)
-            // Honor amount = sum of power of tokens lost by losing team
-            unimplemented!();
-        }
+    fn attack_bonus(&self) -> i16 {
+        self.attackers.power_type.relative_advantage(self.defenders.power_type)
     }
 }
 
 #[derive(Debug)]
 pub struct DeclaredAttack<'a> {
     attackers: BTreeSet<PName>,
+    att_team: TName,
     defenders: BTreeSet<PName>,
+    def_team: TName,
     def_power: PowerType,
     state: &'a ActiveGame,
 }
@@ -65,7 +108,7 @@ pub struct DeclaredAttack<'a> {
 impl<'a> DeclaredAttack<'a> {
     // Initiates an attack, returning a closure over the data necessary to perform the next step of the
     // attack.
-    // TODO: instead of Option, use `Result` indicating which `str` wasn't found
+    // XXX TODO: instead of Option, use `Result` indicating which `str` wasn't found
     pub fn declare<'g>(
         state: &'g ActiveGame,
         attacker: &str,
@@ -84,10 +127,8 @@ impl<'a> DeclaredAttack<'a> {
 
     pub fn finalize(self, att_power: PowerType) -> Attack {
         Attack {
-            attackers: self.attackers,
-            defenders: self.defenders,
-            def_power: self.def_power,
-            att_power,
+            attackers: NamedCombatants{ names: self.attackers, power_type: att_power, for_team: self.att_team },
+            defenders: NamedCombatants{ self.defenders, self.def_power, for_team: self.def_team },
         }
     }
 }
