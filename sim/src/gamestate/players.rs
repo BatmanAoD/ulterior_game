@@ -89,7 +89,10 @@ pub enum Role {
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Debug)]
-// XXX Q: Can `PName` be constructed externally?
+// This should *only* be constructed for known players. I.e., the existence of a
+// `PName` should guarantee the existence of a player with that name.
+// Note: this cannot actually be guaranteed as-is, since the active game-state
+// is not a singleton.
 pub struct PName(String);
 
 impl PartialEq<&str> for PName {

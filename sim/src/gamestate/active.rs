@@ -1,15 +1,14 @@
-use crate::gamestate::teams::TeamsByName;
+use crate::gamestate::teams::{TeamsByName, TName};
 use crate::gamestate::players::{Player, PName};
 
 #[derive(Debug)]
 pub struct ActiveGame {
-    // Q: Can a struct with non-`pub` fields *only* be initialized within the same module?
     pub teams: TeamsByName,
 }
 
 impl ActiveGame {
-    pub fn get_pname(&self, name: &str) -> Option<&PName> {
-        self.players().find(|p| p.name == name).and_then(|p| Some(&p.name))
+    pub fn player_by_name(&self, name: &str) -> Option<(PName, TName)> {
+        self.players().find(|p| p.name == name).map(|p| (p.name.to_owned(), TName(p.team.to_owned())))
     }
 
     pub fn find_player<'a, 'b>(&'a self, player: &'b PName) -> &'a Player {

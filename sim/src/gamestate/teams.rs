@@ -3,7 +3,13 @@ use std::collections::HashMap;
 use crate::gamestate::players;
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
-pub struct TName(String);
+// XXX TODO Like PName, the intent was to make the inner `String` private and
+// only permit creating TNames from this interface.
+// For now, just punt on this.
+// A better strategy might be to only make some type like `TNameRef(&TName)`
+// public, and keep `TName` itself private; this would ensure that outside of
+// this module, only references to valid TNames could be acquired.
+pub struct TName(pub String);
 
 #[derive(Debug)]
 // XXX TODO teams need to track honor
@@ -24,6 +30,10 @@ impl TeamsByName {
         unimplemented!()
     }
 
+    // PName should only be constructed from a *known* player, which is why this method
+    // doesn't return an `Option`.
+    // XXX TODO: Change this. `PName` doesn't actually have the type-safety
+    // that it would need for such a guarantee.
     pub fn find_player<'a, 'b>(&'a self, name: &'b players::PName) -> &'a players::Player {
         for (_team, players) in &self.0 {
             if let Some(player) = players.find_ref(name) {
