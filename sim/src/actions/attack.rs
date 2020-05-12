@@ -116,7 +116,7 @@ impl<'a> DeclaredAttack<'a> {
         // XXX these *panic* if the player cannot be found. Add '?' when
         // proper error-handling has been added.
         let (attacker_name, att_team) = state.player_by_name(attacker)?;
-        let (defender_name, def_team) = state.player_by_name(attacker)?;
+        let (defender_name, def_team) = state.player_by_name(defender)?;
         Some(AddDefender {
             attack: DeclaredAttack {
                 attackers: btreeset! {attacker_name.to_owned()},
