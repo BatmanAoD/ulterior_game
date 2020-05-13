@@ -1,10 +1,10 @@
-extern crate rand;
-
-mod actions;
-mod gamestate;
+#[cfg(test)]
+use ultlib::{actions,gamestate};
 
 fn main() {
     unimplemented!();
+    // Uncomment to check for unused methods
+    // dummy_game().unwrap();
 }
 
 #[test]

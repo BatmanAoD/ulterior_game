@@ -2,10 +2,18 @@
 name = "ult"
 edition = '2018'
 version = "0.1.0"
-authors = ["KJSTRAND"]
+authors = ["BatmanAoD"]
 
 [dependencies]
 itertools = "*"
 maplit = "1"
 rand = "*"
 rand_derive = "*"
+
+[lib]
+name = "ultlib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "simulator"
+path = "src/main.rs"

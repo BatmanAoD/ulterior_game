@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::gamestate::players::{PName, Player, PlayersByName};
+use crate::gamestate::players::{Player, PlayersByName};
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 // TODO Like PName, the intent was to make the inner `String` private and
