@@ -26,7 +26,8 @@ impl TeamsByName {
     }
 
     pub fn add(&mut self, t: &str, players: PlayersByName) {
-        if self.0
+        if self
+            .0
             .insert(TName(String::from(t)), Team { players, honor: 0 })
             .is_some()
         {

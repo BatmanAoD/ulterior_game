@@ -131,8 +131,7 @@ impl Setup {
                 let already_exists = !set.insert(String::from(name));
                 if already_exists {
                     Err(AddTeamErr::TeamAlreadyExists)
-                }
-                else {
+                } else {
                     Ok(())
                 }
             }
