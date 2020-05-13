@@ -48,18 +48,11 @@ impl Attack {
         // TODO DESIGN - should ties, or near-ties, be resolved w/out loss of
         // power or gain of honor?
         let attack_succeeds = attack_strength + self.attack_bonus() > defense_strength;
-        let losers: CombatantRefs;
-        let winning_team: TName;
-        let honor_won: i16;
-        if attack_succeeds {
-            losers = defenders;
-            winning_team = self.attackers.for_team;
-            honor_won = defense_strength;
+        let (losers, winning_team, honor_won) = if attack_succeeds {
+            (defenders, self.attackers.for_team, defense_strength)
         } else {
-            losers = attackers;
-            winning_team = self.defenders.for_team;
-            honor_won = attack_strength;
-        }
+            (attackers, self.defenders.for_team, attack_strength)
+        };
         for loser in losers.players.into_iter() {
             loser.lose_power(losers.power_type);
         }
@@ -118,9 +111,9 @@ impl<'a> DeclaredAttack<'a> {
         let (defender_name, def_team) = state.player_by_name(defender).ok_or(DummyError {})?;
         Ok(AddDefender {
             attack: DeclaredAttack {
-                attackers: btreeset! {attacker_name.to_owned()},
+                attackers: btreeset! {attacker_name},
                 att_team,
-                defenders: btreeset! {defender_name.to_owned()},
+                defenders: btreeset! {defender_name},
                 def_team,
                 def_power,
                 state,
@@ -187,7 +180,7 @@ impl<'a> AddAttacker<'a> {
         // TODO what to do if attacker is on `defenders` list?
         // TODO warn if attacker is on defender's team?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
-            Ok(self.attack.attackers.insert(pname.to_owned()))
+            Ok(self.attack.attackers.insert(pname))
         } else {
             Err(DummyError {})
         }

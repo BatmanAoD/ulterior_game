@@ -11,7 +11,7 @@ use crate::gamestate::players::{Player, PlayersByName};
 // this module, only references to valid TNames could be acquired.
 pub struct TName(pub String);
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Team {
     players: PlayersByName,
     honor: i16,
@@ -26,9 +26,9 @@ impl TeamsByName {
     }
 
     pub fn add(&mut self, t: &str, players: PlayersByName) {
-        if let Some(_) = self
-            .0
+        if self.0
             .insert(TName(String::from(t)), Team { players, honor: 0 })
+            .is_some()
         {
             panic!("Team name added twice: {}", t)
         }

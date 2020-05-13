@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 use std::ops::{Index, IndexMut};
 
-use rand;
 use rand::distributions::{Distribution, Range};
 use rand_derive::Rand;
 
@@ -44,7 +43,7 @@ pub struct Power {
 }
 
 impl Power {
-    fn randomize(power_range: &Range<i8>, mut rng: &mut rand::ThreadRng) -> Self {
+    fn randomize(power_range: Range<i8>, mut rng: &mut rand::ThreadRng) -> Self {
         Power {
             red: ColorPower(Some(power_range.sample(&mut rng))),
             green: ColorPower(Some(power_range.sample(&mut rng))),
@@ -117,25 +116,15 @@ pub struct Player {
 }
 
 impl Player {
-    // Q: Better to take String as arg, or &str?
     pub fn new(name: &str, team: &str) -> Player {
         // Q: Can I avoid re-creating these each time? (Not sure it matters, but still.) Neither
         // object can be `static`.
         let mut rng = rand::thread_rng();
         let power_range: Range<i8> = Range::new(1, 6);
         Player {
-            // Q: typename-initialization syntax versus non-typename struct initialization seems
-            // inconsistent. Why not either `{}` or `()` uniformly?
-            // A?: Something about tuples vs structs...? Does that really matter?
-            // Q: Why can't initialization just infer that I want all my `&str`s to become
-            // `String`s, whenever that's what I'm assigning to?
             name: PName(String::from(name)),
             team: String::from(team),
-            // Q: Why can't rustc infer that the braces are initializing a 'Power' struct? I.e., why
-            // not just `power: { ....`
-            // A?: This inference isn't worthwhile to implement because it would break with
-            // function overloading.
-            power: Power::randomize(&power_range, &mut rng),
+            power: Power::randomize(power_range, &mut rng),
             role: None,
         }
     }
@@ -149,7 +138,7 @@ impl Player {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct PlayersByName(HashMap<PName, Player>);
 
 impl PlayersByName {

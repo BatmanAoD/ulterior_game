@@ -1,11 +1,8 @@
 use std::collections::BTreeSet;
 
 use quick_error::quick_error;
-use rand;
 use rand::Rng;
 
-// Q: Isn't there some way to specify "here in the same parent module" instead of calling it
-// (gamestate) explicitly by name?
 use crate::gamestate;
 
 #[derive(Debug)]
@@ -24,11 +21,11 @@ enum TeamSet {
 // variants do?
 impl TeamSet {
     pub fn len(&self) -> usize {
-        return match *self {
+        match *self {
             // Q: Why is it necessary to specify the enum name when matching on an enum?
             TeamSet::Partial(ref p) => p.len(),
             TeamSet::Complete(ref c) => c.len(),
-        };
+        }
     }
 }
 
@@ -82,10 +79,10 @@ impl Setup {
 
         match self.team_set {
             // Q: See note below about scopes for variants
-            TeamSet::Partial(_) => return Err(StartGameErr::TeamsNotEstablished),
+            TeamSet::Partial(_) => Err(StartGameErr::TeamsNotEstablished),
             TeamSet::Complete(ref team_names) => {
-                // Q: With the match, this begins to seem like some deep "pyramid" indenting...ways
-                // to avoid?
+                // TODO most of this logic should be moved into one or more functions.
+                // Perhaps an `ActiveGame` constructor?
 
                 // Randomize player names
                 let mut player_list = self.player_names.iter().cloned().collect::<Vec<_>>();
@@ -94,7 +91,7 @@ impl Setup {
                 let mut extra_players = self.player_names.len() % team_names.len();
                 let mut team_end: usize;
                 let mut teams = gamestate::teams::TeamsByName::new();
-                for (i, team) in team_names.into_iter().enumerate() {
+                for (i, team) in team_names.iter().enumerate() {
                     let mut players = gamestate::players::PlayersByName::new();
                     let team_start = i * players_per_team;
                     team_end = team_start + players_per_team;
@@ -104,12 +101,12 @@ impl Setup {
                         extra_players -= 1;
                     }
                     let players_on_team = player_list.get(team_start..team_end).unwrap();
-                    for ref name in players_on_team {
-                        players.add(gamestate::players::Player::new(&name, team));
+                    for name in players_on_team {
+                        players.add(gamestate::players::Player::new(name, team));
                     }
                     teams.add(&team, players);
                 }
-                Ok(gamestate::active::ActiveGame { teams: teams })
+                Ok(gamestate::active::ActiveGame { teams })
             }
         }
     }
@@ -129,13 +126,15 @@ impl Setup {
     pub fn add_team(&mut self, name: &str) -> OptErr<AddTeamErr> {
         match self.team_set {
             // Q: Why is `Err` in scope without a `use`?
-            TeamSet::Complete(_) => return Err(AddTeamErr::PlayersAlreadyAdded),
+            TeamSet::Complete(_) => Err(AddTeamErr::PlayersAlreadyAdded),
             TeamSet::Partial(ref mut set) => {
                 let already_exists = !set.insert(String::from(name));
                 if already_exists {
-                    return Err(AddTeamErr::TeamAlreadyExists);
+                    Err(AddTeamErr::TeamAlreadyExists)
                 }
-                Ok(())
+                else {
+                    Ok(())
+                }
             }
         }
     }
@@ -147,7 +146,7 @@ impl Setup {
         }
 
         let final_team = match self.team_set {
-            TeamSet::Partial(ref set) => TeamSet::Complete(set.into_iter().cloned().collect()),
+            TeamSet::Partial(ref set) => TeamSet::Complete(set.iter().cloned().collect()),
             // Q: When `TeamSet` doesn't implement `Clone`, this gives a confusing error:
             // 'match arms have incompatible types...found &TeamSet'
             // ....can this be made nicer? It's not clear why the compiler can't tell that
