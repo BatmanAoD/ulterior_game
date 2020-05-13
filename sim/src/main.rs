@@ -1,11 +1,11 @@
-#[cfg(test)]
-use ultlib::{actions, gamestate};
+mod interactive;
 
 fn main() {
-    unimplemented!();
-    // Uncomment to check for unused methods
-    // dummy_game().unwrap();
+    interactive::run();
 }
+
+#[cfg(test)]
+use ultlib::{actions, gamestate};
 
 #[test]
 fn dummy_game() -> Result<(), actions::attack::DummyError> {

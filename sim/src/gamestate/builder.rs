@@ -1,5 +1,6 @@
 use std::collections::BTreeSet;
 
+use quick_error::quick_error;
 use rand;
 use rand::Rng;
 
@@ -31,10 +32,12 @@ impl TeamSet {
     }
 }
 
-#[derive(Debug)]
-pub enum AddTeamErr {
-    PlayersAlreadyAdded,
-    TeamAlreadyExists,
+quick_error! {
+    #[derive(Debug)]
+    pub enum AddTeamErr {
+        PlayersAlreadyAdded {}
+        TeamAlreadyExists {}
+    }
 }
 
 #[derive(Debug)]

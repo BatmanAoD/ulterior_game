@@ -7,8 +7,10 @@ authors = ["BatmanAoD"]
 [dependencies]
 itertools = "*"
 maplit = "1"
+quick-error = "1"
 rand = "*"
 rand_derive = "*"
+shrust = "*"
 
 [lib]
 name = "ultlib"

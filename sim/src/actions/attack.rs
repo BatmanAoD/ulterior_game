@@ -45,6 +45,8 @@ impl Attack {
         let (attackers, defenders) = self.combatants_by_ref(state);
         let attack_strength = attackers.strength();
         let defense_strength = defenders.strength();
+        // TODO DESIGN - should ties, or near-ties, be resolved w/out loss of
+        // power or gain of honor?
         let attack_succeeds = attack_strength + self.attack_bonus() > defense_strength;
         let losers: CombatantRefs;
         let winning_team: TName;
