@@ -7,7 +7,7 @@ pub fn run() {
     let game = gamestate::builder::Setup::new_game();
     let mut shell = Shell::new(game);
     shell.new_command("team", "Add a new team", 1, |io, game, s| {
-        game.add_team(s[0]).map_err(|e|ExecError::Other(Box::new(e)));
+        game.add_team(s[0]).map_err(|e|ExecError::Other(Box::new(e)))?;
         writeln!(io, "{:?}", &game)?;
         Ok(())
     });

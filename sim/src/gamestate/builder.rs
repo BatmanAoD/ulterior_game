@@ -40,16 +40,21 @@ quick_error! {
     }
 }
 
-#[derive(Debug)]
-pub enum AddPlayerErr {
-    TeamsNotEstablished,
-    PlayerNameDuplicated,
+quick_error! {
+    #[derive(Debug)]
+    pub enum AddPlayerErr {
+        TeamsNotEstablished {}
+        PlayerNameDuplicated {}
+    }
+
 }
 
-#[derive(Debug)]
-pub enum StartGameErr {
-    TeamsNotEstablished,
-    TooFewPlayers,
+quick_error! {
+    #[derive(Debug)]
+    pub enum StartGameErr {
+        TeamsNotEstablished {}
+        TooFewPlayers {}
+    }
 }
 
 // Q: Why doesn't `must_use` actually trigger a warning when the return value is ignored in `main`?
@@ -123,8 +128,7 @@ impl Setup {
 
     pub fn add_team(&mut self, name: &str) -> OptErr<AddTeamErr> {
         match self.team_set {
-            // Q: Why is `Err` in scope (without specifying `Option` or `OptErr`, but `AddTeamErr`
-            // members are not?
+            // Q: Why is `Err` in scope without a `use`?
             TeamSet::Complete(_) => return Err(AddTeamErr::PlayersAlreadyAdded),
             TeamSet::Partial(ref mut set) => {
                 let already_exists = !set.insert(String::from(name));
