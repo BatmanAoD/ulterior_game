@@ -1,5 +1,5 @@
 #[cfg(test)]
-use ultlib::{actions,gamestate};
+use ultlib::{actions, gamestate};
 
 fn main() {
     unimplemented!();

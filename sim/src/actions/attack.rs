@@ -112,8 +112,8 @@ impl<'a> DeclaredAttack<'a> {
         defender: &str,
         def_power: PowerType,
     ) -> Result<AddDefender<'g>, DummyError> {
-        let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(DummyError{})?;
-        let (defender_name, def_team) = state.player_by_name(defender).ok_or(DummyError{})?;
+        let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(DummyError {})?;
+        let (defender_name, def_team) = state.player_by_name(defender).ok_or(DummyError {})?;
         Ok(AddDefender {
             attack: DeclaredAttack {
                 attackers: btreeset! {attacker_name.to_owned()},
