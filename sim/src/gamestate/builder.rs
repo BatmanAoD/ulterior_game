@@ -126,6 +126,7 @@ impl Setup {
     pub fn add_team(&mut self, name: &str) -> OptErr<AddTeamErr> {
         match self.team_set {
             // Q: Why is `Err` in scope without a `use`?
+            // XXX ...why require teams to be added before players?
             TeamSet::Complete(_) => Err(AddTeamErr::PlayersAlreadyAdded),
             TeamSet::Partial(ref mut set) => {
                 let already_exists = !set.insert(String::from(name));
