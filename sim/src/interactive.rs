@@ -81,16 +81,16 @@ fn add_players(mut game: Setup) -> ActiveGame {
     game.finalize().expect("Could not initialize game")
 }
 
-fn declare_attack<'a>(game: &'a ActiveGame, s: &[&str], io: &mut ShellIO) -> Result<AddDefender<'a>, ExecError> {
+fn declare_attack<'a>(game: &'a ActiveGame, s: &[&str], mut io: &mut ShellIO) -> Result<AddDefender<'a>, ExecError> {
     if game.player_by_name(s[0]).is_none() || game.player_by_name(s[1]).is_none() {
         return Err(ExecError::Other(Box::new(InteractiveError::PlayerDoesNotExist)))
     }
 
     writeln!(io, "Choose attack color (red > green > blue):")?;
-    let mut reader = BufReader::new(io);
+    let mut reader = BufReader::new(&mut io);
     let mut color_input = String::new();
     reader.read_line(&mut color_input)?;
-    let power_type = match color_input.to_lowercase().as_str() {
+    let power_type = match color_input.trim().to_lowercase().as_str() {
         "red" => PowerType::Red,
         "green" => PowerType::Green,
         "blue" => PowerType::Blue,
