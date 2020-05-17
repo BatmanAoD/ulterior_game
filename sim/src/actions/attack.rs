@@ -139,7 +139,7 @@ impl<'a> DeclaredAttack<'a> {
 }
 
 pub struct AddDefender<'a> {
-    attack: DeclaredAttack<'a>,
+    pub attack: DeclaredAttack<'a>,
 }
 
 quick_error! {
@@ -150,14 +150,14 @@ quick_error! {
 }
 
 impl<'a> AddDefender<'a> {
-    pub fn add(&mut self, name: &str) -> Result<bool, DummyError> {
-        // TODO If defender already exists, Err
+    pub fn add(&mut self, name: &str) -> Result<(), DummyError> {
         // TODO warn if defender is on attacker's team?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
-            Ok(self.attack.defenders.insert(pname))
-        } else {
-            Err(DummyError::Dummy)
+            if self.attack.defenders.insert(pname) {
+                return Ok(());
+            }
         }
+        Err(DummyError::Dummy)
     }
 
     pub fn add_or_panic(mut self, name: &str) -> Self {
@@ -175,20 +175,23 @@ impl<'a> AddDefender<'a> {
 }
 
 pub struct AddAttacker<'a> {
-    attack: DeclaredAttack<'a>,
+    pub attack: DeclaredAttack<'a>,
     att_power: PowerType,
 }
 
 impl<'a> AddAttacker<'a> {
-    pub fn add(&mut self, name: &str) -> Result<bool, DummyError> {
-        // TODO what to do if attacker already exists?
+    pub fn add(&mut self, name: &str) -> Result<(), DummyError> {
         // TODO what to do if attacker is on `defenders` list?
         // TODO warn if attacker is on defender's team?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
-            Ok(self.attack.attackers.insert(pname))
-        } else {
-            Err(DummyError::Dummy)
+            if self.attack.defenders.contains(&pname) {
+                return Err(DummyError::Dummy)
+            }
+            if self.attack.attackers.insert(pname) {
+                return Ok(());
+            }
         }
+        Err(DummyError::Dummy)
     }
 
     pub fn add_or_panic(mut self, name: &str) -> Self {
