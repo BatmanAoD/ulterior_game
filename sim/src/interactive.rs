@@ -22,20 +22,20 @@ fn play(game: ActiveGame) {
         writeln!(io, "Choose attack color (red > green > blue):")?;
         let mut color_input = String::new();
         io.read_to_string(&mut color_input)?;
-        let power_type;
-        match color_input.to_lowercase().as_str() {
-            "red" => power_type = PowerType::Red,
-            "green" => power_type = PowerType::Green,
-            "blue" => power_type = PowerType::Blue,
+        let power_type = match color_input.to_lowercase().as_str() {
+            "red" => PowerType::Red,
+            "green" => PowerType::Green,
+            "blue" => PowerType::Blue,
             _ => return Err(ExecError::Other(Box::new(InteractiveError::InvalidColorType)))
-        }
+        };
         
         let _attack = DeclaredAttack::declare(
             &game,
             s[0],
             s[1],
             power_type,
-        );
+        ).map_err(|e| ExecError::Other(Box::new(e)))?;
+
         unimplemented!()
     });
     shell.set_prompt("Add new team, or 'quit' to begin adding players:".into());

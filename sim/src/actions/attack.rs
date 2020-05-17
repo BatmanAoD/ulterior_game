@@ -1,4 +1,5 @@
 use maplit::btreeset;
+use quick_error::quick_error;
 use rand::Rng;
 use std::collections::BTreeSet;
 
@@ -107,8 +108,8 @@ impl<'a> DeclaredAttack<'a> {
         defender: &str,
         def_power: PowerType,
     ) -> Result<AddDefender<'g>, DummyError> {
-        let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(DummyError {})?;
-        let (defender_name, def_team) = state.player_by_name(defender).ok_or(DummyError {})?;
+        let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(DummyError::Dummy)?;
+        let (defender_name, def_team) = state.player_by_name(defender).ok_or(DummyError::Dummy)?;
         Ok(AddDefender {
             attack: DeclaredAttack {
                 attackers: btreeset! {attacker_name},
@@ -141,8 +142,12 @@ pub struct AddDefender<'a> {
     attack: DeclaredAttack<'a>,
 }
 
-#[derive(Debug)]
-pub struct DummyError {} // XXX TEMP
+quick_error! {
+    #[derive(Debug)]
+    pub enum DummyError {
+        Dummy {}  // XXX TEMP
+    }
+}
 
 impl<'a> AddDefender<'a> {
     pub fn add(&mut self, name: &str) -> Result<bool, DummyError> {
@@ -151,7 +156,7 @@ impl<'a> AddDefender<'a> {
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
             Ok(self.attack.defenders.insert(pname))
         } else {
-            Err(DummyError {})
+            Err(DummyError::Dummy)
         }
     }
 
@@ -182,7 +187,7 @@ impl<'a> AddAttacker<'a> {
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
             Ok(self.attack.attackers.insert(pname))
         } else {
-            Err(DummyError {})
+            Err(DummyError::Dummy)
         }
     }
 
