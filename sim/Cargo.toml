@@ -5,6 +5,7 @@ version = "0.1.0"
 authors = ["BatmanAoD"]
 
 [dependencies]
+colored = "1"
 itertools = "*"
 maplit = "1"
 quick-error = "1"
