@@ -29,13 +29,13 @@ fn play(mut game: ActiveGame) {
 
         writeln!(io, "About to apply: {:#?}", &attack)?;
         attack.apply(game);
-        writeln!(io, "New game state: {:#?}", game)?;
+        writeln!(io, "New game state: {}", game)?;
         Ok(())
     });
     shell.set_prompt("Playing! Start a new attack, or quit: ".into());
 
     prompt(shell);
-    println!("Final game state: {:#?}", &game);
+    println!("Final game state: {}", &game);
 }
 
 fn setup() -> ActiveGame {
@@ -47,7 +47,7 @@ fn setup() -> ActiveGame {
     println!("{:?}", &setup);
     // TODO go back to `setup_teams` if adding a player returns TwoFewPlayers
     let game = add_players(setup);
-    println!("{:#?}", &game);
+    println!("{}", &game);
     return game
 }
 
@@ -86,7 +86,7 @@ fn declare_attack<'a>(game: &'a ActiveGame, s: &[&str], mut io: &mut ShellIO) ->
         return Err(ExecError::Other(Box::new(InteractiveError::PlayerDoesNotExist)))
     }
 
-    writeln!(io, "Choose attack color (red > green > blue):")?;
+    writeln!(io, "Choose defense color (red > green > blue):")?;
     let mut reader = BufReader::new(&mut io);
     let mut color_input = String::new();
     reader.read_line(&mut color_input)?;
@@ -112,10 +112,12 @@ fn add_combatants(declared: AddDefender) -> Result<Attack, ExecError> {
 
 fn add_defenders<'a>(mut declared: AddDefender<'a>) -> Result<AddAttacker<'a>, ExecError> {
     let mut shell = Shell::new(&mut declared);
-    shell.new_command("defender", "Add a defender", 1, |_io, declared, s| {
-        declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))
+    shell.new_command("defender", "Add a defender", 1, |io, declared, s| {
+        declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))?;
+        writeln!(io, "Attack is now: {}", declared)?;
+        Ok(())
     });
-    let prompt_str = format!("Attack: {:#?}\nAdd defender or quit to add more attackers:", shell.data().attack);
+    let prompt_str = format!("Attack: add defender or quit to add more attackers");
     shell.set_prompt(prompt_str);
 
     prompt(shell);
@@ -125,10 +127,12 @@ fn add_defenders<'a>(mut declared: AddDefender<'a>) -> Result<AddAttacker<'a>, E
 
 fn add_attackers(mut declared: AddAttacker) -> Result<Attack, ExecError> {
     let mut shell = Shell::new(&mut declared);
-    shell.new_command("attacker", "Add an attacker", 1, |_io, declared, s| {
-        declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))
+    shell.new_command("attacker", "Add an attacker", 1, |io, declared, s| {
+        declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))?;
+        writeln!(io, "Attack is now: {}", declared)?;
+        Ok(())
     });
-    let prompt_str = format!("Attack: {:#?}\nAdd attacker or quit to resolve the attack:", shell.data().attack);
+    let prompt_str = format!("Attack: Add attacker or quit to resolve the attack");
     shell.set_prompt(prompt_str);
 
     prompt(shell);

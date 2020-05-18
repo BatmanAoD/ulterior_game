@@ -2,6 +2,7 @@ use maplit::btreeset;
 use quick_error::quick_error;
 use rand::Rng;
 use std::collections::BTreeSet;
+use std::fmt;
 
 use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::{PName, Player, PowerType};
@@ -138,8 +139,24 @@ impl<'a> DeclaredAttack<'a> {
     }
 }
 
+impl<'a> fmt::Display for DeclaredAttack<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO improve this
+        writeln!(f,
+"Attackers: representing team {}; combatants: {:?}
+Defenders (power: {:?}): representing team {}; combatants: {:?}",
+            self.att_team.0, self.attackers, self.def_power, self.def_team.0, self.defenders)
+    }
+}
+
 pub struct AddDefender<'a> {
     pub attack: DeclaredAttack<'a>,
+}
+
+impl<'a> fmt::Display for AddDefender<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.attack.fmt(f)
+    }
 }
 
 quick_error! {
@@ -177,6 +194,14 @@ impl<'a> AddDefender<'a> {
 pub struct AddAttacker<'a> {
     pub attack: DeclaredAttack<'a>,
     att_power: PowerType,
+}
+
+impl<'a> fmt::Display for AddAttacker<'a> {
+    // TODO improve this
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Attackers will use {:?} power.", self.att_power)?;
+        self.attack.fmt(f)
+    }
 }
 
 impl<'a> AddAttacker<'a> {

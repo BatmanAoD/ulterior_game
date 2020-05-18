@@ -1,4 +1,5 @@
 use std::collections::HashMap;
+use std::fmt;
 
 use crate::gamestate::players::{Player, PlayersByName};
 
@@ -15,6 +16,17 @@ pub struct TName(pub String);
 pub struct Team {
     players: PlayersByName,
     honor: i16,
+}
+
+impl fmt::Display for Team {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "  Honor: {}", self.honor)?;
+        for player in self.players.players() {
+            write!(f, "  - {}", player)?;
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Debug)]
@@ -66,12 +78,22 @@ impl TeamsByName {
     */
 
     pub fn players(&self) -> impl Iterator<Item = &Player> {
-        self.0.iter().flat_map(|(_, team)| team.players.iter())
+        self.0.iter().flat_map(|(_, team)| team.players.players())
     }
 
     pub fn players_mut(&mut self) -> impl Iterator<Item = &mut Player> {
         self.0
             .iter_mut()
-            .flat_map(|(_, team)| team.players.iter_mut())
+            .flat_map(|(_, team)| team.players.players_mut())
+    }
+}
+
+impl fmt::Display for TeamsByName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for (name, team) in self.0.iter() {
+            writeln!(f, "Team {}:", name.0)?;
+            writeln!(f, "{}", team)?;
+        }
+        Ok(())
     }
 }

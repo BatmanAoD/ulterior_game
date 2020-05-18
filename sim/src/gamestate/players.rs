@@ -1,6 +1,8 @@
 use std::collections::HashMap;
+use std::fmt;
 use std::ops::{Index, IndexMut};
 
+use colored::Colorize;
 use rand::distributions::{Distribution, Range};
 use rand_derive::Rand;
 
@@ -52,8 +54,26 @@ impl Power {
     }
 }
 
+impl fmt::Display for Power {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(&self.red.to_string().on_red())?;
+        f.write_str(", ")?;
+        f.write_str(&self.green.to_string().on_green())?;
+        f.write_str(", ")?;
+        f.write_str(&self.blue.to_string().on_blue())
+    }
+}
+
 #[derive(Copy, Clone, Debug)]
 pub struct ColorPower(Option<i8>);
+
+impl fmt::Display for ColorPower {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        f.write_str(
+        &i8::from(*self).to_string().white().bold()
+        )
+    }
+}
 
 impl From<ColorPower> for i8 {
     fn from(cp: ColorPower) -> Self {
@@ -138,6 +158,13 @@ impl Player {
     }
 }
 
+// Does not print the team name or the role.
+impl fmt::Display for Player {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "{}: {}", self.name.0, self.power)
+    }
+}
+
 #[derive(Debug, Default)]
 pub struct PlayersByName(HashMap<PName, Player>);
 
@@ -158,10 +185,10 @@ impl PlayersByName {
         self.0.get_mut(name)
     }
     */
-    pub fn iter(&self) -> impl Iterator<Item = &Player> {
+    pub fn players(&self) -> impl Iterator<Item = &Player> {
         self.0.values()
     }
-    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Player> {
+    pub fn players_mut(&mut self) -> impl Iterator<Item = &mut Player> {
         self.0.values_mut()
     }
 }

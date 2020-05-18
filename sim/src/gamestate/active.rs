@@ -1,6 +1,8 @@
 use crate::gamestate::players::{PName, Player};
 use crate::gamestate::teams::{TName, TeamsByName};
 
+use std::fmt;
+
 #[derive(Debug)]
 pub struct ActiveGame {
     pub teams: TeamsByName,
@@ -29,5 +31,12 @@ impl ActiveGame {
 
     pub fn players_mut(&mut self) -> impl Iterator<Item = &mut Player> {
         self.teams.players_mut()
+    }
+}
+
+impl fmt::Display for ActiveGame {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f, "Game state:")?;
+        writeln!(f, "{}", self.teams)
     }
 }
