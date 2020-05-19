@@ -56,22 +56,28 @@ impl Power {
 
 impl fmt::Display for Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(&self.red.to_string().on_red())?;
-        f.write_str(", ")?;
-        f.write_str(&self.green.to_string().on_green())?;
-        f.write_str(", ")?;
-        f.write_str(&self.blue.to_string().on_blue())
+        write!(
+            f,
+            "{redstart}{red}{redend}, {greenstart}{green}{greenend}, {bluestart}{blue}{blueend}",
+            redstart = "(".to_string().bold().red(),
+            red = self.red.to_string().on_red(),
+            redend = ")".to_string().bold().red(),
+            greenstart = "(".to_string().bold().green(),
+            green = self.green.to_string().on_green(),
+            greenend = ")".to_string().bold().green(),
+            bluestart = "(".to_string().bold().blue(),
+            blue = self.blue.to_string().on_blue(),
+            blueend = ")".to_string().bold().blue(),
+        )
     }
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct ColorPower(Option<i8>);
+pub struct ColorPower(/*XXX TEMP */pub Option<i8>);
 
 impl fmt::Display for ColorPower {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        f.write_str(
-        &i8::from(*self).to_string().white().bold()
-        )
+        write!(f, "{}", i8::from(*self).to_string().white().bold())
     }
 }
 
