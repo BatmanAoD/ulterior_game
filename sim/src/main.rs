@@ -22,7 +22,7 @@ fn dummy_game() -> Result<(), actions::attack::DummyError> {
         .add_player_or_panic("Rosie")
         .finalize()
         .unwrap();
-    println!("Start-of-game setup: {:#?}", &game);
+    println!("Start-of-game setup: {}", &game);
 
     let attack = actions::attack::DeclaredAttack::declare(
         &game,
@@ -39,7 +39,7 @@ fn dummy_game() -> Result<(), actions::attack::DummyError> {
 
     println!("Attack: {:#?}", &attack);
     attack.apply(&mut game);
-    println!("After attack resolves: {:#?}", &game);
+    println!("After attack resolves: {}", &game);
 
     Ok(())
 }

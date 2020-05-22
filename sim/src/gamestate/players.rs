@@ -60,13 +60,13 @@ impl fmt::Display for Power {
             f,
             "{redstart}{red}{redend}, {greenstart}{green}{greenend}, {bluestart}{blue}{blueend}",
             redstart = "(".to_string().bold().red(),
-            red = self.red.to_string().on_red(),
+            red = self.red,
             redend = ")".to_string().bold().red(),
             greenstart = "(".to_string().bold().green(),
-            green = self.green.to_string().on_green(),
+            green = self.green,
             greenend = ")".to_string().bold().green(),
             bluestart = "(".to_string().bold().blue(),
-            blue = self.blue.to_string().on_blue(),
+            blue = self.blue,
             blueend = ")".to_string().bold().blue(),
         )
     }
