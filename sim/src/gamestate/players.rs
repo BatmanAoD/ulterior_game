@@ -3,6 +3,7 @@ use std::fmt;
 use std::ops::{Index, IndexMut};
 
 use colored::Colorize;
+use colored::Color::{self, Red, Green, Blue};
 use rand::distributions::{Distribution, Range};
 use rand_derive::Rand;
 
@@ -58,22 +59,27 @@ impl fmt::Display for Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "{redstart}{red}{redend}, {greenstart}{green}{greenend}, {bluestart}{blue}{blueend}",
-            redstart = "(".to_string().bold().red(),
-            red = self.red,
-            redend = ")".to_string().bold().red(),
-            greenstart = "(".to_string().bold().green(),
-            green = self.green,
-            greenend = ")".to_string().bold().green(),
-            bluestart = "(".to_string().bold().blue(),
-            blue = self.blue,
-            blueend = ")".to_string().bold().blue(),
+            "{red}, {green}, {blue}",
+            red = self.red.pretty(Red),
+            blue = self.blue.pretty(Blue),
+            green = self.green.pretty(Green),
         )
     }
 }
 
 #[derive(Copy, Clone, Debug)]
 pub struct ColorPower(/*XXX TEMP */pub Option<i8>);
+
+impl ColorPower {
+    fn pretty(self, color: Color) -> String {
+        format!(
+            "{}{}{}",
+            "(".to_string().bold().color(color),
+            self.to_string(),
+            ")".to_string().bold().color(color),
+        )
+    }
+}
 
 impl fmt::Display for ColorPower {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
