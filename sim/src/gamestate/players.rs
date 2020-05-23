@@ -148,14 +148,14 @@ pub struct Player {
 }
 
 impl Player {
-    pub fn new(name: &str, team: &str) -> Player {
+    pub fn new(name: String, team: &str) -> Player {
         // Q: Can I avoid re-creating these each time? (Not sure it matters, but still.) Neither
         // object can be `static`.
         let mut rng = rand::thread_rng();
         let power_range: Range<i8> = Range::new(1, 6);
         Player {
-            name: PName(String::from(name)),
-            team: String::from(team),
+            name: PName(name),
+            team: team.to_owned(),
             power: Power::randomize(power_range, &mut rng),
             role: None,
         }
@@ -181,13 +181,12 @@ impl fmt::Display for Player {
 pub struct PlayersByName(HashMap<PName, Player>);
 
 impl PlayersByName {
-    pub fn new() -> PlayersByName {
-        PlayersByName(HashMap::new())
-    }
-    pub fn add(&mut self, p: Player) {
-        // Q: Some way to insert using the hash directly instead of cloning the string first, since
-        // the actual string isn't really necessary?
-        self.0.insert(p.name.clone(), p);
+    pub fn from(team: &str, names: impl Iterator<Item=String>) -> Self {
+        let mut map = HashMap::new();
+        for name in names {
+            map.insert(PName(name.clone()), Player::new(name, team));
+        }
+        PlayersByName(map)
     }
     /* TODO - do I need these?
     pub fn find_ref(&self, name: &PName) -> Option<&Player> {
