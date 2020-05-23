@@ -28,7 +28,7 @@ fn dummy_game() -> Result<(), actions::attack::DummyError> {
         &game,
         "Kyle",
         "Brandon",
-        gamestate::players::PowerType::Red,
+        gamestate::power::PowerType::Red,
     )
     .unwrap()
     .add_or_panic("Laura")

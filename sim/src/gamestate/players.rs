@@ -70,6 +70,7 @@ impl Player {
         let mut formatted = String::new();
         for player in players {
             // Newlines are added by the `Player` formatter.
+            // TODO use an actual columnar formatter.
             formatted = format!("{}{}", &formatted, player);
         }
         formatted

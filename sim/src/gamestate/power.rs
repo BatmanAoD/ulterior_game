@@ -40,6 +40,7 @@ impl PowerType {
 
     fn unit_advantage(self, against: PowerType) -> i16 {
         // Q: Is there some clever arithmetic I could do here instead of `match`?
+        // (self as i16 - against as i16 + 1) % 3 - 1   // XXX test
         match self as i16 - against as i16 {
             // Red beats Green, Green beats Blue, Blue beats Red
             0 => 0,
@@ -133,4 +134,17 @@ impl IndexMut<PowerType> for Power {
             PowerType::Green => &mut self.green,
         }
     }
+}
+
+#[test]
+fn power_advantage() {
+    assert!(PowerType::Red.relative_advantage(PowerType::Red) == 0);
+    assert!(PowerType::Red.relative_advantage(PowerType::Green) == 2);
+    assert!(PowerType::Red.relative_advantage(PowerType::Blue) == -2);
+    assert!(PowerType::Green.relative_advantage(PowerType::Red) == -2);
+    assert!(PowerType::Green.relative_advantage(PowerType::Green) == 0);
+    assert!(PowerType::Green.relative_advantage(PowerType::Blue) == 2);
+    assert!(PowerType::Blue.relative_advantage(PowerType::Red) == 2);
+    assert!(PowerType::Blue.relative_advantage(PowerType::Green) == -2);
+    assert!(PowerType::Blue.relative_advantage(PowerType::Blue) == 0);
 }
