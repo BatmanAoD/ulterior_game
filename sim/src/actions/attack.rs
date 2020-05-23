@@ -1,3 +1,4 @@
+use itertools::Itertools;
 use maplit::btreeset;
 use quick_error::quick_error;
 use rand::Rng;
@@ -14,11 +15,29 @@ pub struct Attack {
     defenders: NamedCombatants,
 }
 
+impl fmt::Display for Attack {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO improve this
+        write!(f,
+            // Formatting `NamedCombatants` will insert newlines
+            "Attackers: {}Defenders {}",
+            self.attackers, self.defenders)
+    }
+}
+
 #[derive(Debug)]
 struct NamedCombatants {
     names: BTreeSet<PName>,
     power_type: PowerType,
     for_team: TName,
+}
+
+impl fmt::Display for NamedCombatants {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        writeln!(f,
+            "{}; representing team {}; combatants: {}",
+            self.power_type, self.for_team.0, self.names.iter().join(", "))
+    }
 }
 
 #[derive(Debug)]
@@ -143,9 +162,13 @@ impl<'a> fmt::Display for DeclaredAttack<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // TODO improve this
         writeln!(f,
-"Attackers: representing team {}; combatants: {:?}
-Defenders (power: {:?}): representing team {}; combatants: {:?}",
-            self.att_team.0, self.attackers, self.def_power, self.def_team.0, self.defenders)
+"Attackers: representing team {}; combatants:
+{}
+Defenders (power: {}): representing team {}; combatants:
+{}",
+            self.att_team.0, self.state.pretty_players(self.attackers.iter()),
+            self.def_power, self.def_team.0, self.state.pretty_players(self.defenders.iter()),
+        )
     }
 }
 
@@ -169,6 +192,7 @@ quick_error! {
 impl<'a> AddDefender<'a> {
     pub fn add(&mut self, name: &str) -> Result<(), DummyError> {
         // TODO warn if defender is on attacker's team?
+        // TODO error if defender no longer has their token of the defending power color?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
             if self.attack.defenders.insert(pname) {
                 return Ok(());
@@ -199,7 +223,7 @@ pub struct AddAttacker<'a> {
 impl<'a> fmt::Display for AddAttacker<'a> {
     // TODO improve this
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "Attackers will use {:?} power.", self.att_power)?;
+        writeln!(f, "Attackers will use {} power.", self.att_power)?;
         self.attack.fmt(f)
     }
 }

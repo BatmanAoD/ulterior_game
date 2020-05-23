@@ -3,7 +3,7 @@ use std::fmt;
 use std::ops::{Index, IndexMut};
 
 use colored::Colorize;
-use colored::Color::{self, Red, Green, Blue};
+use colored::Color;
 use rand::distributions::{Distribution, Range};
 use rand_derive::Rand;
 
@@ -12,6 +12,22 @@ pub enum PowerType {
     Red = 0,
     Blue = 1,
     Green = 2,
+}
+
+impl From<PowerType> for Color {
+    fn from(pt: PowerType) -> Self {
+        match pt {
+            PowerType::Red => Color::Red,
+            PowerType::Blue => Color::Blue,
+            PowerType::Green => Color::Green,
+        }
+    }
+}
+
+impl fmt::Display for PowerType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", format!("{:?}", self).color(Color::from(*self)))
+    }
 }
 
 // TODO DESIGN relative color advantage?
@@ -59,10 +75,10 @@ impl fmt::Display for Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "{red}, {green}, {blue}",
-            red = self.red.pretty(Red),
-            blue = self.blue.pretty(Blue),
-            green = self.green.pretty(Green),
+            "{red}\t{green}\t{blue}",
+            red = self.red.pretty_or_empty(Color::Red),
+            blue = self.blue.pretty_or_empty(Color::Blue),
+            green = self.green.pretty_or_empty(Color::Green),
         )
     }
 }
@@ -71,6 +87,12 @@ impl fmt::Display for Power {
 pub struct ColorPower(/*XXX TEMP */pub Option<i8>);
 
 impl ColorPower {
+    fn pretty_or_empty(self, color: Color) -> String {
+        match self.0 {
+            Some(_) => self.pretty(color),
+            None => "".to_owned(),
+        }
+    }
     fn pretty(self, color: Color) -> String {
         format!(
             "{}{}{}",
@@ -129,6 +151,12 @@ pub enum Role {
 // is not a singleton.
 pub struct PName(String);
 
+impl fmt::Display for PName {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
 impl PartialEq<&str> for PName {
     fn eq(&self, s: &&str) -> bool {
         self.0 == *s
@@ -168,12 +196,21 @@ impl Player {
     pub fn lose_power(&mut self, ptype: PowerType) {
         self.power[ptype] = ColorPower(None)
     }
+
+    pub fn pretty<'a>(players: impl Iterator<Item=&'a Player>) -> String {
+        let mut formatted = String::new();
+        for player in players {
+            // Newlines are added by the `Player` formatter.
+            formatted = format!("{}{}", &formatted, player);
+        }
+        formatted
+    }
 }
 
 // Does not print the team name or the role.
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "{}: {}", self.name.0, self.power)
+        writeln!(f, "{}:\t\t{}", self.name.0, self.power)
     }
 }
 
@@ -188,10 +225,10 @@ impl PlayersByName {
         }
         PlayersByName(map)
     }
-    /* TODO - do I need these?
-    pub fn find_ref(&self, name: &PName) -> Option<&Player> {
+    pub fn find_player(&self, name: &PName) -> Option<&Player> {
         self.0.get(name)
     }
+    /* TODO - do I need this?
     pub fn find_mut(&mut self, name: &PName) -> Option<&mut Player> {
         self.0.get_mut(name)
     }

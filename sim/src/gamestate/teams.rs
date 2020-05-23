@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fmt;
 
-use crate::gamestate::players::{Player, PlayersByName};
+use crate::gamestate::players::{Player, PlayersByName, PName};
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 // TODO Like PName, the intent was to make the inner `String` private and
@@ -22,16 +22,17 @@ impl Team {
     pub fn gain_honor(&mut self, honor: i16) {
         self.honor += honor;
     }
+
+    pub fn pretty_players(&self) -> String {
+        Player::pretty(self.players.players())
+    }
 }
 
 impl fmt::Display for Team {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "  Honor: {}", self.honor)?;
-        for player in self.players.players() {
-            write!(f, "  - {}", player)?;
-        }
-
-        Ok(())
+        // TODO: Indent the 'pretty_players' string
+        write!(f, "{}", self.pretty_players())
     }
 }
 
@@ -59,20 +60,21 @@ impl TeamsByName {
         self.0.get_mut(t).expect("Team not found")
     }
 
-    /* TODO - do I need these?
     // PName should only be constructed from a *known* player, which is why this method
     // doesn't return an `Option`.
     // TODO: Change this. `PName` doesn't actually have the type-safety
     // that it would need for such a guarantee.
-    pub fn find_player(&self, name: &PName) -> &Player {
+    // Also, this would break if there were multiple game states.
+    pub fn player_data(&self, name: &PName) -> &Player {
         for (_team, team) in &self.0 {
-            if let Some(player) = team.players.find_ref(name) {
+            if let Some(player) = team.players.find_player(name) {
                 return player;
             }
         }
         panic!("Could not find player {:?}", name);
     }
 
+    /* TODO - do I need this?
     pub fn find_player_mut(&mut self, name: &PName) -> &mut Player {
         for (_team, team) in &mut self.0 {
             if let Some(player) = team.players.find_mut(name) {
@@ -91,6 +93,10 @@ impl TeamsByName {
         self.0
             .iter_mut()
             .flat_map(|(_, team)| team.players.players_mut())
+    }
+
+    pub fn pretty_players<'a>(&self, names: impl Iterator<Item=&'a PName>) -> String {
+        Player::pretty(names.map(|name| self.player_data(name)))
     }
 }
 

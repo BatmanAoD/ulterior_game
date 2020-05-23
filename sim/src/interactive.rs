@@ -31,9 +31,9 @@ fn play(mut game: ActiveGame) {
         let declared = declare_attack(game, s, io)?;
         let attack = add_combatants(declared)?;
 
-        writeln!(io, "About to apply: {:#?}", &attack)?;
+        writeln!(io, "About to apply: {}", &attack)?;
         attack.apply(game);
-        writeln!(io, "New game state: {}", game)?;
+        writeln!(io, "{}", game)?;
         Ok(())
     });
     shell.set_prompt("Playing! Start a new attack, or quit: ".into());
@@ -93,14 +93,14 @@ fn add_combatants(declared: AddDefender) -> Result<Attack, ExecError> {
 }
 
 fn add_defenders<'a>(mut declared: AddDefender<'a>) -> Result<AddAttacker<'a>, ExecError> {
+    println!("Adding defenders to {}", &declared);
     let mut shell = Shell::new(&mut declared);
     shell.new_command("defender", "Add a defender", 1, |io, declared, s| {
         declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))?;
-        writeln!(io, "Attack is now: {}", declared)?;
+        writeln!(io, "Adding defenders to {}", declared)?;
         Ok(())
     });
-    let prompt_str = format!("Attack: add defender or quit to add more attackers");
-    shell.set_prompt(prompt_str);
+    shell.set_prompt("Add defender or quit to add more attackers:".into());
 
     prompt(shell);
 
@@ -108,14 +108,14 @@ fn add_defenders<'a>(mut declared: AddDefender<'a>) -> Result<AddAttacker<'a>, E
 }
 
 fn add_attackers(mut declared: AddAttacker) -> Result<Attack, ExecError> {
+    println!("Adding attackers to {}", &declared);
     let mut shell = Shell::new(&mut declared);
     shell.new_command("attacker", "Add an attacker", 1, |io, declared, s| {
         declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))?;
-        writeln!(io, "Attack is now: {}", declared)?;
+        writeln!(io, "Adding attackers to {}", declared)?;
         Ok(())
     });
-    let prompt_str = format!("Attack: Add attacker or quit to resolve the attack");
-    shell.set_prompt(prompt_str);
+    shell.set_prompt("Add attacker or quit to resolve the attack:".into());
 
     prompt(shell);
 

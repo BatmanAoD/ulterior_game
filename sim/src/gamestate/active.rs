@@ -64,6 +64,10 @@ impl ActiveGame {
     pub fn players_mut(&mut self) -> impl Iterator<Item = &mut Player> {
         self.teams.players_mut()
     }
+
+    pub fn pretty_players<'a>(&self, names: impl Iterator<Item=&'a PName>) -> String {
+        self.teams.pretty_players(names)
+    }
 }
 
 impl fmt::Display for ActiveGame {
