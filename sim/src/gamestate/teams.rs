@@ -18,6 +18,12 @@ pub struct Team {
     honor: i16,
 }
 
+impl Team {
+    pub fn gain_honor(&mut self, honor: i16) {
+        self.honor += honor;
+    }
+}
+
 impl fmt::Display for Team {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "  Honor: {}", self.honor)?;
@@ -49,8 +55,8 @@ impl TeamsByName {
 
     // Panics if the team does not exist
     // (TODO: After revising TName/PName, reconsider this)
-    pub fn gain_honor(&mut self, t: &TName, honor: i16) {
-        self.0.get_mut(t).expect("Team not found").honor += honor
+    pub fn team_mut(&mut self, t: &TName) -> &mut Team {
+        self.0.get_mut(t).expect("Team not found")
     }
 
     /* TODO - do I need these?

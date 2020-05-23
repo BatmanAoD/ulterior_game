@@ -58,7 +58,7 @@ impl Attack {
         for loser in losers.players.into_iter() {
             loser.lose_power(losers.power_type);
         }
-        state.teams.gain_honor(&winning_team, honor_won);
+        state.gain_honor(&winning_team, honor_won);
     }
     fn combatants_by_ref<'a>(
         &self,

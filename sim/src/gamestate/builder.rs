@@ -1,9 +1,8 @@
 use std::collections::BTreeSet;
 
 use quick_error::quick_error;
-use rand::Rng;
 
-use crate::gamestate;
+use crate::gamestate::active::ActiveGame;
 
 #[derive(Debug)]
 pub struct Setup {
@@ -23,6 +22,7 @@ impl TeamSet {
     pub fn len(&self) -> usize {
         match *self {
             // Q: Why is it necessary to specify the enum name when matching on an enum?
+            // (Except `Result`, it seems?)
             TeamSet::Partial(ref p) => p.len(),
             TeamSet::Complete(ref c) => c.len(),
         }
@@ -64,44 +64,17 @@ impl Setup {
         }
     }
 
-    pub fn finalize(self) -> Result<gamestate::active::ActiveGame, StartGameErr> {
+    pub fn finalize(self) -> Result<ActiveGame, StartGameErr> {
         // TODO DESIGN min number of players?
         if self.player_names.len() < self.team_set.len() * 3 {
             return Err(StartGameErr::TooFewPlayers);
         }
 
-        let mut rng = rand::thread_rng();
-
         match self.team_set {
             // Q: See note below about scopes for variants
             TeamSet::Partial(_) => Err(StartGameErr::TeamsNotEstablished),
-            TeamSet::Complete(ref team_names) => {
-                // TODO most of this logic should be moved into one or more functions.
-                // Perhaps an `ActiveGame` constructor?
-
-                // Randomize player names
-                let mut player_list = self.player_names.iter().cloned().collect::<Vec<_>>();
-                rng.shuffle(&mut player_list);
-                let players_per_team = self.player_names.len() / team_names.len();
-                let mut extra_players = self.player_names.len() % team_names.len();
-                let mut team_end: usize;
-                let mut teams = gamestate::teams::TeamsByName::new();
-                for (i, team) in team_names.iter().enumerate() {
-                    let mut players = gamestate::players::PlayersByName::new();
-                    let team_start = i * players_per_team;
-                    team_end = team_start + players_per_team;
-                    // Add an extra player to the first (players % teams) teams
-                    if extra_players > 0 {
-                        team_end += 1;
-                        extra_players -= 1;
-                    }
-                    let players_on_team = player_list.get(team_start..team_end).unwrap();
-                    for name in players_on_team {
-                        players.add(gamestate::players::Player::new(name, team));
-                    }
-                    teams.add(&team, players);
-                }
-                Ok(gamestate::active::ActiveGame { teams })
+            TeamSet::Complete(team_names) => {
+                Ok(ActiveGame::new(self.player_names.into_iter(), team_names))
             }
         }
     }
