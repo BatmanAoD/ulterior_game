@@ -16,10 +16,8 @@ impl ActiveGame {
             // Randomize player order
             rng.shuffle(&mut player_list);
             let players_per_team = player_list.len() / team_names.len();
-            println!("Players per team: {}", players_per_team);
             let mut extra_players = player_list.len() % team_names.len();
             let mut teams = TeamsByName::new();
-            println!("Remaining players to assign: {:?}", &player_list);
             for team in team_names {
                 // Add an extra player to the first (players % teams) teams
                 let num_players = if extra_players > 0 {
@@ -29,10 +27,8 @@ impl ActiveGame {
                     players_per_team
                 };
 
-                let mut players_on_team = player_list.split_off(num_players + 1);
+                let mut players_on_team = player_list.split_off(num_players);
                 mem::swap(&mut players_on_team, &mut player_list);
-                println!("Players on next team: {:?}", &players_on_team);
-                println!("Unassigned: {:?}", &player_list);
 
                 teams.add(&team, PlayersByName::from(&team, players_on_team.into_iter()));
             }
