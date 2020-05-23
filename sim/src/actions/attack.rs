@@ -6,7 +6,8 @@ use std::collections::BTreeSet;
 use std::fmt;
 
 use crate::gamestate::active::ActiveGame;
-use crate::gamestate::players::{PName, Player, PowerType};
+use crate::gamestate::players::{PName, Player};
+use crate::gamestate::power::PowerType;
 use crate::gamestate::teams::TName;
 
 #[derive(Debug)]

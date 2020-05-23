@@ -2,7 +2,6 @@ use std::collections::HashMap;
 use std::fmt;
 
 use rand::distributions::Range;
-use rand_derive::Rand;
 
 use crate::gamestate::power::{Power, PowerType, ColorPower};
 

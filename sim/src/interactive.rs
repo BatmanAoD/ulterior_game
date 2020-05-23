@@ -1,4 +1,4 @@
-use ultlib::gamestate::{active::ActiveGame,builder::Setup,players::PowerType};
+use ultlib::gamestate::{active::ActiveGame,builder::Setup,power::PowerType};
 use ultlib::actions::attack::{AddDefender,AddAttacker,Attack,DeclaredAttack};
 
 use quick_error::quick_error;

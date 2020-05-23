@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fmt;
 use std::ops::{Index, IndexMut};
 
@@ -62,7 +61,7 @@ pub struct Power {
 }
 
 impl Power {
-    fn randomize(power_range: Range<i8>, mut rng: &mut rand::ThreadRng) -> Self {
+    pub fn randomize(power_range: Range<i8>, mut rng: &mut rand::ThreadRng) -> Self {
         Power {
             red: ColorPower(Some(power_range.sample(&mut rng))),
             green: ColorPower(Some(power_range.sample(&mut rng))),
