@@ -62,11 +62,19 @@ impl Player {
         self.power[ptype].into()
     }
 
+    pub fn has_power(&self, ptype: PowerType) -> bool {
+        self.power[ptype].0.is_some()
+    }
+
     pub fn lose_power(&mut self, ptype: PowerType) {
         self.power[ptype] = ColorPower(None)
     }
 
-    pub fn pretty<'a>(players: impl Iterator<Item=&'a Player>) -> String {
+    pub fn pretty<'a>(player: &'a Player) -> String {
+        format!("{}", player)
+    }
+
+    pub fn pretty_multi<'a>(players: impl Iterator<Item=&'a Player>) -> String {
         let mut formatted = String::new();
         for player in players {
             // Newlines are added by the `Player` formatter.
@@ -98,11 +106,9 @@ impl PlayersByName {
     pub fn find_player(&self, name: &PName) -> Option<&Player> {
         self.0.get(name)
     }
-    /* TODO - do I need this?
     pub fn find_mut(&mut self, name: &PName) -> Option<&mut Player> {
         self.0.get_mut(name)
     }
-    */
     pub fn players(&self) -> impl Iterator<Item = &Player> {
         self.0.values()
     }

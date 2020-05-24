@@ -24,7 +24,7 @@ impl Team {
     }
 
     pub fn pretty_players(&self) -> String {
-        Player::pretty(self.players.players())
+        Player::pretty_multi(self.players.players())
     }
 }
 
@@ -74,8 +74,7 @@ impl TeamsByName {
         panic!("Could not find player {:?}", name);
     }
 
-    /* TODO - do I need this?
-    pub fn find_player_mut(&mut self, name: &PName) -> &mut Player {
+    pub fn player_mut(&mut self, name: &PName) -> &mut Player {
         for (_team, team) in &mut self.0 {
             if let Some(player) = team.players.find_mut(name) {
                 return player;
@@ -83,7 +82,6 @@ impl TeamsByName {
         }
         panic!("Could not find player {:?}", name);
     }
-    */
 
     pub fn players(&self) -> impl Iterator<Item = &Player> {
         self.0.iter().flat_map(|(_, team)| team.players.players())
@@ -95,8 +93,12 @@ impl TeamsByName {
             .flat_map(|(_, team)| team.players.players_mut())
     }
 
+    pub fn pretty_player<'a>(&self, name: &'a PName) -> String {
+        Player::pretty(self.player_data(name))
+    }
+
     pub fn pretty_players<'a>(&self, names: impl Iterator<Item=&'a PName>) -> String {
-        Player::pretty(names.map(|name| self.player_data(name)))
+        Player::pretty_multi(names.map(|name| self.player_data(name)))
     }
 }
 
