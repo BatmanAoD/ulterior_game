@@ -39,18 +39,17 @@ impl PowerType {
     }
 
     fn unit_advantage(self, against: PowerType) -> i16 {
-        // Q: Is there some clever arithmetic I could do here instead of `match`?
-        // (self as i16 - against as i16 + 1) % 3 - 1   // XXX test
-        match self as i16 - against as i16 {
-            // Red beats Green, Green beats Blue, Blue beats Red
-            0 => 0,
-            1 | -2 => 1,
-            2 | -1 => -1,
-            _ => panic!(
-                "Invalid 'PowerType' values: {}, {}",
-                self as i16, against as i16
-            ),
-        }
+        /*
+        Red beats Green, Green beats Blue, Blue beats Red:
+        (self - against):
+        0 => 0,
+        1 | -2 => 1,
+        2 | -1 => -1,
+
+        This is modular arithmetic, rotated by 1; add another 3 to make the
+        values positive so that `%` performs the correct operation.
+        */
+        (self as i16 - against as i16 + 4) % 3 - 1
     }
 }
 
