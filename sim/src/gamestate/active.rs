@@ -1,7 +1,7 @@
 use crate::actions::attack::{Attack, AttackOutcome};
 use crate::gamestate::players::{PName, Player, PlayersByName};
 use crate::gamestate::teams::{TName, TeamsByName};
-use crate::gamestate::with_history::GameHistory;
+use crate::gamestate::with_history::{HistoryNavigationErr, GameHistory};
 
 use rand::Rng;
 use std::fmt;
@@ -56,6 +56,10 @@ impl ActiveGame {
 
     pub fn apply_attack_outcome(&mut self, attack: AttackOutcome) {
         self.0.apply_attack(attack);
+    }
+
+    pub fn undo_last_attack(&mut self) -> Result<(), HistoryNavigationErr> {
+        self.0.undo_last_attack()
     }
 
     pub fn player_by_name(&self, name: &str) -> Option<(PName, TName)> {

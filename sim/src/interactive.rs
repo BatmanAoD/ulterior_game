@@ -25,7 +25,6 @@ quick_error! {
 
 fn play(mut game: ActiveGame) {
     let mut shell = Shell::new(&mut game);
-    // TODO: since this is the only command, use `Shell::set_default` instead?
     shell.new_command(
         "attack",
         "Initiate a new attack; arg1: attacker, arg2: defender",
@@ -42,7 +41,17 @@ fn play(mut game: ActiveGame) {
             Ok(())
         },
     );
-    shell.set_prompt("Playing! Start a new attack, or quit: ".into());
+    shell.new_command(
+        "undo",
+        "Undo last attack",
+        0,
+        |io, game, _s| {
+            game.undo_last_attack()?;
+            writeln!(io, "{}", game)?;
+            Ok(())
+        },
+    );
+    shell.set_prompt("Playing! Start a new attack, undo last attack, or quit: ".into());
 
     prompt(shell);
     println!("Final game state: {}", &game);
