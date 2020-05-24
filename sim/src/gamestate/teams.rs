@@ -31,7 +31,6 @@ impl Team {
 impl fmt::Display for Team {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "  Honor: {}", self.honor)?;
-        // TODO: Indent the 'pretty_players' string
         write!(f, "{}", self.pretty_players())
     }
 }
