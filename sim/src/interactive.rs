@@ -6,8 +6,7 @@ use shrust::{ExecError, Shell, ShellIO};
 use std::io::prelude::*;
 use std::io::BufReader;
 
-// TODO throughout, it would be nice to have more readable printing.
-// Eventually, there will need to be a way to show information to certain
+// TODO Eventually, there will need to be a way to show information to certain
 // players but not others.
 
 pub fn run() {
@@ -20,7 +19,7 @@ quick_error! {
     #[derive(Debug)]
     enum InteractiveError {
         InvalidColorType {}
-        PlayerDoesNotExist {}   // TODO which player(s)?
+        PlayerDoesNotExist(name: String) {}
     }
 }
 
@@ -63,10 +62,17 @@ fn setup_game() -> ActiveGame {
     setup.finalize().expect("Could not initialize game")
 }
 
-fn declare_attack<'a>(game: &'a ActiveGame, s: &[&str], mut io: &mut ShellIO) -> Result<AddDefender<'a>, ExecError> {
-    if game.player_by_name(s[0]).is_none() || game.player_by_name(s[1]).is_none() {
-        return Err(ExecError::Other(Box::new(InteractiveError::PlayerDoesNotExist)))
+fn ensure_player_exists(game: &ActiveGame, name: &str) -> Result<(), ExecError> {
+    if game.player_by_name(name).is_none() {
+        Err(ExecError::Other(Box::new(InteractiveError::PlayerDoesNotExist(name.to_owned()))))
+    } else {
+        Ok(())
     }
+}
+
+fn declare_attack<'a>(game: &'a ActiveGame, s: &[&str], mut io: &mut ShellIO) -> Result<AddDefender<'a>, ExecError> {
+    ensure_player_exists(game, s[0])?;
+    ensure_player_exists(game, s[1])?;
 
     writeln!(io, "Choose defense color (red > green > blue):")?;
     let mut reader = BufReader::new(&mut io);
