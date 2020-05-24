@@ -50,7 +50,10 @@ impl Setup {
             return Err(StartGameErr::TooFewPlayers);
         }
 
-        Ok(ActiveGame::new(self.player_names.into_iter(), self.team_names.into_iter()))
+        Ok(ActiveGame::new(
+            self.player_names.into_iter(),
+            self.team_names.into_iter(),
+        ))
     }
 
     pub fn add_team_or_panic(mut self, name: &str) -> Self {

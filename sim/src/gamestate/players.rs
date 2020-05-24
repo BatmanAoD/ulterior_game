@@ -74,7 +74,7 @@ impl Player {
         format!("{}", player)
     }
 
-    pub fn pretty_multi<'a>(players: impl Iterator<Item=&'a Player>) -> String {
+    pub fn pretty_multi<'a>(players: impl Iterator<Item = &'a Player>) -> String {
         let mut formatted = String::new();
         for player in players {
             // Newlines are added by the `Player` formatter.
@@ -96,7 +96,7 @@ impl fmt::Display for Player {
 pub struct PlayersByName(HashMap<PName, Player>);
 
 impl PlayersByName {
-    pub fn from(team: &str, names: impl Iterator<Item=String>) -> Self {
+    pub fn from(team: &str, names: impl Iterator<Item = String>) -> Self {
         let mut map = HashMap::new();
         for name in names {
             map.insert(PName(name.clone()), Player::new(name, team));

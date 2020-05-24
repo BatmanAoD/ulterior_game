@@ -1,8 +1,8 @@
 use std::fmt;
 use std::ops::{Index, IndexMut};
 
-use colored::Colorize;
 use colored::Color;
+use colored::Colorize;
 use rand::distributions::{Distribution, Range};
 use rand_derive::Rand;
 

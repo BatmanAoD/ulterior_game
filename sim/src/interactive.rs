@@ -1,5 +1,5 @@
-use ultlib::gamestate::{active::ActiveGame,builder::Setup,power::PowerType};
-use ultlib::actions::attack::{AddDefender,AddAttacker,Attack,DeclaredAttack};
+use ultlib::actions::attack::{AddAttacker, AddDefender, Attack, DeclaredAttack};
+use ultlib::gamestate::{active::ActiveGame, builder::Setup, power::PowerType};
 
 use quick_error::quick_error;
 use shrust::{ExecError, Shell, ShellIO};
@@ -26,15 +26,20 @@ quick_error! {
 fn play(mut game: ActiveGame) {
     let mut shell = Shell::new(&mut game);
     // TODO: since this is the only command, use `Shell::set_default` instead?
-    shell.new_command("attack", "Initiate a new attack; arg1: attacker, arg2: defender", 2, |io, game, s| {
-        let declared = declare_attack(game, s, io)?;
-        let attack = add_combatants(declared)?;
+    shell.new_command(
+        "attack",
+        "Initiate a new attack; arg1: attacker, arg2: defender",
+        2,
+        |io, game, s| {
+            let declared = declare_attack(game, s, io)?;
+            let attack = add_combatants(declared)?;
 
-        writeln!(io, "About to apply: {}", &attack)?;
-        attack.apply(game);
-        writeln!(io, "{}", game)?;
-        Ok(())
-    });
+            writeln!(io, "About to apply: {}", &attack)?;
+            attack.apply(game);
+            writeln!(io, "{}", game)?;
+            Ok(())
+        },
+    );
     shell.set_prompt("Playing! Start a new attack, or quit: ".into());
 
     prompt(shell);
@@ -45,13 +50,15 @@ fn setup_game() -> ActiveGame {
     let mut setup = Setup::new_game();
     let mut shell = Shell::new(&mut setup);
     shell.new_command("team", "Add a new team", 1, |io, setup, s| {
-        setup.add_team(s[0])
+        setup
+            .add_team(s[0])
             .map_err(|e| ExecError::Other(Box::new(e)))?;
         writeln!(io, "{:?}", &setup)?;
         Ok(())
     });
     shell.new_command("player", "Add a new player", 1, |io, setup, s| {
-        setup.add_player(s[0])
+        setup
+            .add_player(s[0])
             .map_err(|e| ExecError::Other(Box::new(e)))?;
         writeln!(io, "{:?}", &setup)?;
         Ok(())
@@ -64,13 +71,19 @@ fn setup_game() -> ActiveGame {
 
 fn ensure_player_exists(game: &ActiveGame, name: &str) -> Result<(), ExecError> {
     if game.player_by_name(name).is_none() {
-        Err(ExecError::Other(Box::new(InteractiveError::PlayerDoesNotExist(name.to_owned()))))
+        Err(ExecError::Other(Box::new(
+            InteractiveError::PlayerDoesNotExist(name.to_owned()),
+        )))
     } else {
         Ok(())
     }
 }
 
-fn declare_attack<'a>(game: &'a ActiveGame, s: &[&str], mut io: &mut ShellIO) -> Result<AddDefender<'a>, ExecError> {
+fn declare_attack<'a>(
+    game: &'a ActiveGame,
+    s: &[&str],
+    mut io: &mut ShellIO,
+) -> Result<AddDefender<'a>, ExecError> {
     ensure_player_exists(game, s[0])?;
     ensure_player_exists(game, s[1])?;
 
@@ -82,15 +95,15 @@ fn declare_attack<'a>(game: &'a ActiveGame, s: &[&str], mut io: &mut ShellIO) ->
         "red" => PowerType::Red,
         "green" => PowerType::Green,
         "blue" => PowerType::Blue,
-        _ => return Err(ExecError::Other(Box::new(InteractiveError::InvalidColorType)))
+        _ => {
+            return Err(ExecError::Other(Box::new(
+                InteractiveError::InvalidColorType,
+            )))
+        }
     };
-    
-    DeclaredAttack::declare(
-        &game,
-        s[0],
-        s[1],
-        power_type,
-    ).map_err(|e| ExecError::Other(Box::new(e)))
+
+    DeclaredAttack::declare(&game, s[0], s[1], power_type)
+        .map_err(|e| ExecError::Other(Box::new(e)))
 }
 
 fn add_combatants(declared: AddDefender) -> Result<Attack, ExecError> {
@@ -102,7 +115,9 @@ fn add_defenders<'a>(mut declared: AddDefender<'a>) -> Result<AddAttacker<'a>, E
     println!("Adding defenders to {}", &declared);
     let mut shell = Shell::new(&mut declared);
     shell.new_command("defender", "Add a defender", 1, |io, declared, s| {
-        declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))?;
+        declared
+            .add(s[0])
+            .map_err(|e| ExecError::Other(Box::new(e)))?;
         writeln!(io, "Adding defenders to {}", declared)?;
         Ok(())
     });
@@ -117,7 +132,9 @@ fn add_attackers(mut declared: AddAttacker) -> Result<Attack, ExecError> {
     println!("Adding attackers to {}", &declared);
     let mut shell = Shell::new(&mut declared);
     shell.new_command("attacker", "Add an attacker", 1, |io, declared, s| {
-        declared.add(s[0]).map_err(|e| ExecError::Other(Box::new(e)))?;
+        declared
+            .add(s[0])
+            .map_err(|e| ExecError::Other(Box::new(e)))?;
         writeln!(io, "Adding attackers to {}", declared)?;
         Ok(())
     });

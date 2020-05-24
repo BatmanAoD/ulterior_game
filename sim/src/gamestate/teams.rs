@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fmt;
 
-use crate::gamestate::players::{Player, PlayersByName, PName};
+use crate::gamestate::players::{PName, Player, PlayersByName};
 
 #[derive(PartialEq, Eq, Hash, Clone, Debug)]
 // TODO Like PName, the intent was to make the inner `String` private and
@@ -97,7 +97,7 @@ impl TeamsByName {
         Player::pretty(self.player_data(name))
     }
 
-    pub fn pretty_players<'a>(&self, names: impl Iterator<Item=&'a PName>) -> String {
+    pub fn pretty_players<'a>(&self, names: impl Iterator<Item = &'a PName>) -> String {
         Player::pretty_multi(names.map(|name| self.player_data(name)))
     }
 }

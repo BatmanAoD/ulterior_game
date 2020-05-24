@@ -35,9 +35,14 @@ struct NamedCombatants {
 
 impl fmt::Display for NamedCombatants {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f,
+        writeln!(
+            f,
             "{} ({}); representing team {}; combatants: {}",
-            self.primary, self.power_type, self.for_team.0, self.assists.iter().join(", "))
+            self.primary,
+            self.power_type,
+            self.for_team.0,
+            self.assists.iter().join(", ")
+        )
     }
 }
 
@@ -51,11 +56,12 @@ struct CombatantRefs<'a> {
 impl<'a> CombatantRefs<'a> {
     fn strength(&self) -> i16 {
         self.primary.strength(self.power_type) as i16
-        + self.assists
-            .iter()
-            // Q: is explicit casting a reasonable way to avoid overflow here?
-            .map(|a| a.strength(self.power_type) as i16)
-            .sum::<i16>()
+            + self
+                .assists
+                .iter()
+                // Q: is explicit casting a reasonable way to avoid overflow here?
+                .map(|a| a.strength(self.power_type) as i16)
+                .sum::<i16>()
     }
 }
 
@@ -73,9 +79,19 @@ impl Attack {
         // power or gain of honor?
         let attack_succeeds = attack_strength + self.attack_bonus() > defense_strength;
         let (losers, win_assists, winning_team, honor_won) = if attack_succeeds {
-            (defenders, attackers.assists, self.attackers.for_team, defense_strength)
+            (
+                defenders,
+                attackers.assists,
+                self.attackers.for_team,
+                defense_strength,
+            )
         } else {
-            (attackers, defenders.assists, self.defenders.for_team, attack_strength)
+            (
+                attackers,
+                defenders.assists,
+                self.defenders.for_team,
+                attack_strength,
+            )
         };
         // The primary combatant always loses their token.
         losers.primary.lose_power(losers.power_type);
@@ -103,8 +119,14 @@ impl Attack {
             .into_iter() // We move the existing `&mut`s rather than taking `&mut &mut`
             .filter(|p| self.defenders.assists.contains(&p.name))
             .collect();
-        let primary_attacker = v_primary_attacker.into_iter().next().expect("Could not find primary attacker data");
-        let primary_defender = v_primary_defender.into_iter().next().expect("Could not find primary defender data");
+        let primary_attacker = v_primary_attacker
+            .into_iter()
+            .next()
+            .expect("Could not find primary attacker data");
+        let primary_defender = v_primary_defender
+            .into_iter()
+            .next()
+            .expect("Could not find primary defender data");
         (
             CombatantRefs {
                 primary: primary_attacker,
@@ -147,10 +169,14 @@ impl<'a> DeclaredAttack<'a> {
         defender: &str,
         def_power: PowerType,
     ) -> Result<AddDefender<'g>, InvalidAttackErr> {
-        let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(InvalidAttackErr::CombatantNotFound)?;
-        let (defender_name, def_team) = state.player_by_name(defender).ok_or(InvalidAttackErr::CombatantNotFound)?;
+        let (attacker_name, att_team) = state
+            .player_by_name(attacker)
+            .ok_or(InvalidAttackErr::CombatantNotFound)?;
+        let (defender_name, def_team) = state
+            .player_by_name(defender)
+            .ok_or(InvalidAttackErr::CombatantNotFound)?;
         if !state.player_data(&defender_name).has_power(def_power) {
-            return Err(InvalidAttackErr::CombatantMissingPowerType)
+            return Err(InvalidAttackErr::CombatantMissingPowerType);
         }
         Ok(AddDefender {
             attack: DeclaredAttack {
@@ -187,8 +213,9 @@ impl<'a> DeclaredAttack<'a> {
 impl<'a> fmt::Display for DeclaredAttack<'a> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // TODO improve this
-        writeln!(f,
-"Attackers: representing team {}; combatants:
+        writeln!(
+            f,
+            "Attackers: representing team {}; combatants:
 {} (initial attacker)
 {}
 Defenders (power: {}): representing team {}; combatants:
@@ -231,7 +258,12 @@ impl<'a> AddDefender<'a> {
         // TODO DESIGN - since assists sacrifice their tokens, should they be permitted to
         // pick a token to sacrifice?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
-            if !self.attack.state.player_data(&pname).has_power(self.attack.def_power) {
+            if !self
+                .attack
+                .state
+                .player_data(&pname)
+                .has_power(self.attack.def_power)
+            {
                 return Err(InvalidAttackErr::CombatantMissingPowerType);
             }
             if !self.attack.defender_assists.insert(pname) {
@@ -274,14 +306,21 @@ impl<'a> AddAttacker<'a> {
     pub fn add(&mut self, name: &str) -> Result<(), InvalidAttackErr> {
         // TODO warn if attacker is on defender's team?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
-            if !self.attack.state.player_data(&pname).has_power(self.attack.def_power) {
+            if !self
+                .attack
+                .state
+                .player_data(&pname)
+                .has_power(self.attack.def_power)
+            {
                 return Err(InvalidAttackErr::CombatantMissingPowerType);
             }
-            if pname == self.attack.targeted_defender || self.attack.defender_assists.contains(&pname) {
+            if pname == self.attack.targeted_defender
+                || self.attack.defender_assists.contains(&pname)
+            {
                 return Err(InvalidAttackErr::AttackerAlreadyDefending);
             }
             if !self.attack.attacker_assists.insert(pname) {
-                return Err(InvalidAttackErr::DuplicateCombatant)
+                return Err(InvalidAttackErr::DuplicateCombatant);
             }
             Ok(())
         } else {

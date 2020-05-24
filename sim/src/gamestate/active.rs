@@ -10,29 +10,35 @@ pub struct ActiveGame {
 }
 
 impl ActiveGame {
-    pub fn new(player_names: impl Iterator<Item=String>, team_names: impl ExactSizeIterator<Item=String>) -> Self {
+    pub fn new(
+        player_names: impl Iterator<Item = String>,
+        team_names: impl ExactSizeIterator<Item = String>,
+    ) -> Self {
         let mut rng = rand::thread_rng();
-            let mut player_list = player_names.collect::<Vec<_>>();
-            // Randomize player order
-            rng.shuffle(&mut player_list);
-            let players_per_team = player_list.len() / team_names.len();
-            let mut extra_players = player_list.len() % team_names.len();
-            let mut teams = TeamsByName::new();
-            for team in team_names {
-                // Add an extra player to the first (players % teams) teams
-                let num_players = if extra_players > 0 {
-                    extra_players -= 1;
-                    players_per_team + 1
-                } else {
-                    players_per_team
-                };
+        let mut player_list = player_names.collect::<Vec<_>>();
+        // Randomize player order
+        rng.shuffle(&mut player_list);
+        let players_per_team = player_list.len() / team_names.len();
+        let mut extra_players = player_list.len() % team_names.len();
+        let mut teams = TeamsByName::new();
+        for team in team_names {
+            // Add an extra player to the first (players % teams) teams
+            let num_players = if extra_players > 0 {
+                extra_players -= 1;
+                players_per_team + 1
+            } else {
+                players_per_team
+            };
 
-                let mut players_on_team = player_list.split_off(num_players);
-                mem::swap(&mut players_on_team, &mut player_list);
+            let mut players_on_team = player_list.split_off(num_players);
+            mem::swap(&mut players_on_team, &mut player_list);
 
-                teams.add(&team, PlayersByName::from(&team, players_on_team.into_iter()));
-            }
-            ActiveGame{teams}
+            teams.add(
+                &team,
+                PlayersByName::from(&team, players_on_team.into_iter()),
+            );
+        }
+        ActiveGame { teams }
     }
 
     // Panics if the team does not exist
@@ -67,7 +73,7 @@ impl ActiveGame {
         self.teams.pretty_player(name)
     }
 
-    pub fn pretty_players<'a>(&self, names: impl Iterator<Item=&'a PName>) -> String {
+    pub fn pretty_players<'a>(&self, names: impl Iterator<Item = &'a PName>) -> String {
         self.teams.pretty_players(names)
     }
 }
