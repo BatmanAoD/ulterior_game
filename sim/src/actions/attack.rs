@@ -4,15 +4,20 @@ use rand::Rng;
 use std::collections::BTreeSet;
 use std::fmt;
 
-use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::{PName, Player};
 use crate::gamestate::power::PowerType;
-use crate::gamestate::teams::TName;
+use crate::gamestate::teams::{TName, TeamsByName};
 
 #[derive(Debug)]
 pub struct Attack {
     attackers: NamedCombatants,
     defenders: NamedCombatants,
+}
+
+#[derive(Debug)]
+pub struct AttackOutcome {
+    attack: Attack,
+    /* XXX TEMP pub */ pub new_state: TeamsByName,
 }
 
 impl fmt::Display for Attack {
@@ -66,13 +71,9 @@ impl<'a> CombatantRefs<'a> {
 }
 
 impl Attack {
-    // TODO: It would be nice to split this into a pure function, `outcome`, and
-    // a method on the output of that function, `apply`, that would actually
-    // perform the operation. This would permit "previewing" the results of the attack.
-    // However, since `state` is borrowed to construct `combatants_by_ref`, this
-    // might not be possible as-is.
-    pub fn apply(self, state: &mut ActiveGame) {
-        let (attackers, defenders) = self.combatants_by_ref(state);
+    pub fn outcome(self, initial_state: &TeamsByName) -> AttackOutcome {
+        let mut new_state = initial_state.clone();
+        let (attackers, defenders) = self.combatants_by_ref(&mut new_state);
         let attack_strength = attackers.strength();
         let defense_strength = defenders.strength();
         // TODO DESIGN - should ties, or near-ties, be resolved w/out loss of
@@ -82,14 +83,14 @@ impl Attack {
             (
                 defenders,
                 attackers.assists,
-                self.attackers.for_team,
+                &self.attackers.for_team,
                 defense_strength,
             )
         } else {
             (
                 attackers,
                 defenders.assists,
-                self.defenders.for_team,
+                &self.defenders.for_team,
                 attack_strength,
             )
         };
@@ -99,11 +100,15 @@ impl Attack {
         for assist in losers.assists.into_iter().chain(win_assists.into_iter()) {
             assist.lose_power(losers.power_type);
         }
-        state.gain_honor(&winning_team, honor_won);
+        new_state.gain_honor(winning_team, honor_won);
+        AttackOutcome {
+            attack: self,
+            new_state,
+        }
     }
     fn combatants_by_ref<'a>(
         &self,
-        state: &'a mut ActiveGame,
+        state: &'a mut TeamsByName,
     ) -> (CombatantRefs<'a>, CombatantRefs<'a>) {
         // Q: This is... pretty ugly. Is there a more elegant way? Slice patterns, maybe?
         let (v_primary_attacker, others): (Vec<_>, Vec<_>) = state
@@ -156,7 +161,7 @@ pub struct DeclaredAttack<'a> {
     defender_assists: BTreeSet<PName>,
     def_team: TName,
     def_power: PowerType,
-    state: &'a ActiveGame,
+    state: &'a TeamsByName,
 }
 
 impl<'a> DeclaredAttack<'a> {
@@ -164,7 +169,7 @@ impl<'a> DeclaredAttack<'a> {
     // attack.
     // TODO DESIGN: Let attacker declare which team they're fighting for?
     pub fn declare<'g>(
-        state: &'g ActiveGame,
+        state: &'g TeamsByName,
         attacker: &str,
         defender: &str,
         def_power: PowerType,

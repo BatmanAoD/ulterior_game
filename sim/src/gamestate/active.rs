@@ -6,7 +6,7 @@ use std::{fmt, mem};
 
 #[derive(Debug)]
 pub struct ActiveGame {
-    teams: TeamsByName,
+    pub /* XXX TEMP pub */ teams: TeamsByName,
 }
 
 impl ActiveGame {
@@ -41,16 +41,8 @@ impl ActiveGame {
         ActiveGame { teams }
     }
 
-    // Panics if the team does not exist
-    // (TODO: After revising TName/PName, reconsider this)
-    pub fn gain_honor(&mut self, t: &TName, honor: i16) {
-        self.teams.team_mut(t).gain_honor(honor);
-    }
-
     pub fn player_by_name(&self, name: &str) -> Option<(PName, TName)> {
-        self.players()
-            .find(|p| p.name == name)
-            .map(|p| (p.name.to_owned(), TName(p.team.to_owned())))
+        self.teams.player_by_name(name)
     }
 
     pub fn player_data(&self, player: &PName) -> &Player {

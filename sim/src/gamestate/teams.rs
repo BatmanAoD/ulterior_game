@@ -12,7 +12,7 @@ use crate::gamestate::players::{PName, Player, PlayersByName};
 // this module, only references to valid TNames could be acquired.
 pub struct TName(pub String);
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct Team {
     players: PlayersByName,
     honor: i16,
@@ -36,7 +36,7 @@ impl fmt::Display for Team {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct TeamsByName(HashMap<TName, Team>);
 
 impl TeamsByName {
@@ -52,7 +52,18 @@ impl TeamsByName {
 
     // Panics if the team does not exist
     // (TODO: After revising TName/PName, reconsider this)
-    pub fn team_mut(&mut self, t: &TName) -> &mut Team {
+    pub fn gain_honor(&mut self, t: &TName, honor: i16) {
+        self.team_mut(t).gain_honor(honor);
+    }
+
+    pub fn player_by_name(&self, name: &str) -> Option<(PName, TName)> {
+        self.players()
+            .find(|p| p.name == name)
+            .map(|p| (p.name.to_owned(), TName(p.team.to_owned())))
+    }
+
+    // Panics if the team does not exist
+    fn team_mut(&mut self, t: &TName) -> &mut Team {
         self.0.get_mut(t).expect("Team not found")
     }
 

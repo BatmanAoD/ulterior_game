@@ -6,7 +6,7 @@ use rand::distributions::Range;
 use crate::gamestate::power::{Power, PowerType};
 
 // TODO move to separate file
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum Role {
     Prophet { target: String },
     Traitor,
@@ -32,7 +32,7 @@ impl PartialEq<&str> for PName {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Player {
     pub name: PName,
     pub team: String, // TODO should be TName
@@ -92,7 +92,7 @@ impl fmt::Display for Player {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Clone, Debug, Default)]
 pub struct PlayersByName(HashMap<PName, Player>);
 
 impl PlayersByName {

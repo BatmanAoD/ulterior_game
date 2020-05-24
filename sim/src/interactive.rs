@@ -5,6 +5,7 @@ use quick_error::quick_error;
 use shrust::{ExecError, Shell, ShellIO};
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::mem;
 
 // TODO Eventually, there will need to be a way to show information to certain
 // players but not others.
@@ -35,7 +36,11 @@ fn play(mut game: ActiveGame) {
             let attack = add_combatants(declared)?;
 
             writeln!(io, "About to apply: {}", &attack)?;
-            attack.apply(game);
+
+            // XXX TEMP - use history
+            let mut outcome = attack.outcome(&game.teams);
+            mem::swap(&mut outcome.new_state, &mut game.teams);
+
             writeln!(io, "{}", game)?;
             Ok(())
         },
@@ -102,7 +107,7 @@ fn declare_attack<'a>(
         }
     };
 
-    DeclaredAttack::declare(&game, s[0], s[1], power_type)
+    DeclaredAttack::declare(&game.teams, s[0], s[1], power_type)
         .map_err(|e| ExecError::Other(Box::new(e)))
 }
 
