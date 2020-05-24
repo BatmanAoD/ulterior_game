@@ -1,13 +1,13 @@
+use crate::actions::attack::{Attack, AttackOutcome};
 use crate::gamestate::players::{PName, Player, PlayersByName};
 use crate::gamestate::teams::{TName, TeamsByName};
+use crate::gamestate::with_history::GameHistory;
 
 use rand::Rng;
 use std::fmt;
 
 #[derive(Debug)]
-pub struct ActiveGame {
-    pub teams: TeamsByName,
-}
+pub struct ActiveGame(GameHistory);
 
 impl ActiveGame {
     pub fn new(
@@ -38,41 +38,58 @@ impl ActiveGame {
             );
         }
         assert!(player_list.is_empty());
-        ActiveGame { teams }
+        ActiveGame(GameHistory::starting_with(teams))
+    }
+
+    pub fn current_state(&self) -> &TeamsByName {
+        self.0.current_state()
+    }
+
+    pub fn preview(&self, attack: Attack) -> AttackOutcome {
+        attack.outcome(self.current_state())
+    }
+
+    pub fn apply_attack(&mut self, attack: Attack) {
+        let outcome = self.preview(attack);
+        self.apply_attack_outcome(outcome);
+    }
+
+    pub fn apply_attack_outcome(&mut self, attack: AttackOutcome) {
+        self.0.apply_attack(attack);
     }
 
     pub fn player_by_name(&self, name: &str) -> Option<(PName, TName)> {
-        self.teams.player_by_name(name)
+        self.current_state().player_by_name(name)
     }
 
     pub fn player_data(&self, player: &PName) -> &Player {
-        self.teams.player_data(player)
+        self.current_state().player_data(player)
     }
 
     pub fn player_mut(&mut self, player: &PName) -> &mut Player {
-        self.teams.player_mut(player)
+        self.0.current_mut().player_mut(player)
     }
 
     pub fn players(&self) -> impl Iterator<Item = &Player> {
-        self.teams.players()
+        self.current_state().players()
     }
 
     pub fn players_mut(&mut self) -> impl Iterator<Item = &mut Player> {
-        self.teams.players_mut()
+        self.0.current_mut().players_mut()
     }
 
     pub fn pretty_player<'a>(&self, name: &'a PName) -> String {
-        self.teams.pretty_player(name)
+        self.current_state().pretty_player(name)
     }
 
     pub fn pretty_players<'a>(&self, names: impl Iterator<Item = &'a PName>) -> String {
-        self.teams.pretty_players(names)
+        self.current_state().pretty_players(names)
     }
 }
 
 impl fmt::Display for ActiveGame {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "Game state:")?;
-        writeln!(f, "{}", self.teams)
+        writeln!(f, "{}", self.current_state())
     }
 }

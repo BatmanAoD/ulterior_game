@@ -7,9 +7,6 @@ fn main() {
 #[cfg(test)]
 use ultlib::{actions, gamestate};
 
-#[cfg(test)]
-use std::mem;
-
 #[test]
 fn dummy_game() -> Result<(), actions::attack::InvalidAttackErr> {
     let mut game = gamestate::builder::Setup::new_game()
@@ -28,7 +25,7 @@ fn dummy_game() -> Result<(), actions::attack::InvalidAttackErr> {
     println!("Start-of-game setup: {}", &game);
 
     let attack = actions::attack::DeclaredAttack::declare(
-        &game.teams,
+        &game.current_state(),
         "Kyle",
         "Brandon",
         gamestate::power::PowerType::Red,
@@ -41,9 +38,7 @@ fn dummy_game() -> Result<(), actions::attack::InvalidAttackErr> {
     .finalize_offense();
 
     println!("Attack: {:#?}", &attack);
-    // XXX TEMP - use history
-    let mut outcome = attack.outcome(&game.teams);
-    mem::swap(&mut outcome.new_state, &mut game.teams);
+    game.apply_attack(attack);
     println!("After attack resolves: {}", &game);
 
     Ok(())

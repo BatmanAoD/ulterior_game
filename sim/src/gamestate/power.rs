@@ -75,7 +75,7 @@ impl fmt::Display for Power {
         write!(
             f,
             // Q: the width argument only seems to work for the 'empty' case. Why?
-            "{:7}{:7}{}",
+            "{:5}{:5}{}",
             self.red.pretty_or_empty(Color::Red),
             self.blue.pretty_or_empty(Color::Blue),
             self.green.pretty_or_empty(Color::Green),
