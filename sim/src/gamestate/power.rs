@@ -92,7 +92,7 @@ impl ColorPower {
     }
 
     // TODO better name
-    pub fn nonempty(&self) -> bool {
+    pub fn nonempty(self) -> bool {
         self.0.is_some()
     }
 

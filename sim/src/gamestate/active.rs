@@ -20,7 +20,7 @@ impl ActiveGame {
         rng.shuffle(&mut player_list);
         let players_per_team = player_list.len() / team_names.len();
         let mut extra_players = player_list.len() % team_names.len();
-        let mut teams = TeamsByName::new();
+        let mut teams: TeamsByName = Default::default();
         for team in team_names {
             // Add an extra player to the first (players % teams) teams
             let num_players = if extra_players > 0 {

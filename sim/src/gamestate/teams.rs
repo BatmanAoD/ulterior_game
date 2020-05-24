@@ -36,14 +36,10 @@ impl fmt::Display for Team {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct TeamsByName(HashMap<TName, Team>);
 
 impl TeamsByName {
-    pub fn new() -> TeamsByName {
-        TeamsByName(HashMap::new())
-    }
-
     pub fn add(&mut self, t: &str, players: PlayersByName) {
         if self
             .0
@@ -66,7 +62,7 @@ impl TeamsByName {
     // that it would need for such a guarantee.
     // Also, this would break if there were multiple game states.
     pub fn player_data(&self, name: &PName) -> &Player {
-        for (_team, team) in &self.0 {
+        for team in self.0.values() {
             if let Some(player) = team.players.find_player(name) {
                 return player;
             }
@@ -75,7 +71,7 @@ impl TeamsByName {
     }
 
     pub fn player_mut(&mut self, name: &PName) -> &mut Player {
-        for (_team, team) in &mut self.0 {
+        for team in self.0.values_mut() {
             if let Some(player) = team.players.find_mut(name) {
                 return player;
             }

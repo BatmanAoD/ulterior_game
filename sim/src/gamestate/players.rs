@@ -70,7 +70,7 @@ impl Player {
         self.power[ptype].discard()
     }
 
-    pub fn pretty<'a>(player: &'a Player) -> String {
+    pub fn pretty(player: &'_ Player) -> String {
         format!("{}", player)
     }
 

@@ -111,7 +111,7 @@ fn add_combatants(declared: AddDefender) -> Result<Attack, ExecError> {
     add_attackers(defense_ready)
 }
 
-fn add_defenders<'a>(mut declared: AddDefender<'a>) -> Result<AddAttacker<'a>, ExecError> {
+fn add_defenders(mut declared: AddDefender<'_>) -> Result<AddAttacker, ExecError> {
     println!("Adding defenders to {}", &declared);
     let mut shell = Shell::new(&mut declared);
     shell.new_command("defender", "Add a defender", 1, |io, declared, s| {
