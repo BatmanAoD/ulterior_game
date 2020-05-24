@@ -2,7 +2,7 @@ use crate::gamestate::players::{PName, Player, PlayersByName};
 use crate::gamestate::teams::{TName, TeamsByName};
 
 use rand::Rng;
-use std::{fmt, mem};
+use std::fmt;
 
 #[derive(Debug)]
 pub struct ActiveGame {
@@ -32,7 +32,10 @@ impl ActiveGame {
 
             let players_on_team = player_list.drain(..num_players);
 
-            teams.add(&team, PlayersByName::from(&team, players_on_team));
+            teams.add(
+                &team,
+                PlayersByName::from(&team, players_on_team),
+            );
         }
         assert!(player_list.is_empty());
         ActiveGame { teams }
