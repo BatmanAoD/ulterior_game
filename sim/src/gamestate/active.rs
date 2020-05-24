@@ -6,7 +6,7 @@ use std::{fmt, mem};
 
 #[derive(Debug)]
 pub struct ActiveGame {
-    pub /* XXX TEMP pub */ teams: TeamsByName,
+    pub teams: TeamsByName,
 }
 
 impl ActiveGame {
@@ -30,14 +30,11 @@ impl ActiveGame {
                 players_per_team
             };
 
-            let mut players_on_team = player_list.split_off(num_players);
-            mem::swap(&mut players_on_team, &mut player_list);
+            let players_on_team = player_list.drain(..num_players);
 
-            teams.add(
-                &team,
-                PlayersByName::from(&team, players_on_team.into_iter()),
-            );
+            teams.add(&team, PlayersByName::from(&team, players_on_team));
         }
+        assert!(player_list.is_empty());
         ActiveGame { teams }
     }
 

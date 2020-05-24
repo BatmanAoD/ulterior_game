@@ -14,9 +14,9 @@ use std::mem;
 fn dummy_game() -> Result<(), actions::attack::InvalidAttackErr> {
     let mut game = gamestate::builder::Setup::new_game()
         .add_team_or_panic("Geats")
-        .add_team_or_panic("Danes")
         .add_player_or_panic("Kyle")
         .add_player_or_panic("Laura")
+        .add_team_or_panic("Danes")
         .add_player_or_panic("Brandon")
         .add_player_or_panic("Suzie")
         .add_player_or_panic("Lauren")
