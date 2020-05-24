@@ -17,7 +17,7 @@ pub struct Setup {
 
 quick_error! {
     #[derive(Debug)]
-    pub enum GameSetupError {
+    pub enum GameSetupErr {
         PlayerNameDuplicated {}
         TeamNameDuplicated {}
     }
@@ -65,19 +65,19 @@ impl Setup {
         self
     }
 
-    pub fn add_team(&mut self, name: &str) -> OptErr<GameSetupError> {
+    pub fn add_team(&mut self, name: &str) -> OptErr<GameSetupErr> {
         let already_exists = !self.team_names.insert(String::from(name));
         if already_exists {
-            Err(GameSetupError::TeamNameDuplicated)
+            Err(GameSetupErr::TeamNameDuplicated)
         } else {
             Ok(())
         }
     }
 
-    pub fn add_player(&mut self, name: &str) -> OptErr<GameSetupError> {
+    pub fn add_player(&mut self, name: &str) -> OptErr<GameSetupErr> {
         let already_exists = !self.player_names.insert(String::from(name));
         if already_exists {
-            Err(GameSetupError::PlayerNameDuplicated)
+            Err(GameSetupErr::PlayerNameDuplicated)
         } else {
             Ok(())
         }

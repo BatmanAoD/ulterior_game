@@ -146,9 +146,9 @@ impl<'a> DeclaredAttack<'a> {
         attacker: &str,
         defender: &str,
         def_power: PowerType,
-    ) -> Result<AddDefender<'g>, DummyError> {
-        let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(DummyError::Dummy)?;
-        let (defender_name, def_team) = state.player_by_name(defender).ok_or(DummyError::Dummy)?;
+    ) -> Result<AddDefender<'g>, InvalidAttackErr> {
+        let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(InvalidAttackErr::CombatantNotFound)?;
+        let (defender_name, def_team) = state.player_by_name(defender).ok_or(InvalidAttackErr::CombatantNotFound)?;
         // XXX error if defender no longer has their token of the appropriate color
         Ok(AddDefender {
             attack: DeclaredAttack {
@@ -215,25 +215,30 @@ impl<'a> fmt::Display for AddDefender<'a> {
 
 quick_error! {
     #[derive(Debug)]
-    pub enum DummyError {
-        Dummy {}  // XXX TEMP
+    pub enum InvalidAttackErr {
+        CombatantNotFound {}
+        CombatantMissingPowerType {}
+        DuplicateCombatant {}
+        AttackerAlreadyDefending {}
     }
 }
 
 impl<'a> AddDefender<'a> {
-    pub fn add(&mut self, name: &str) -> Result<(), DummyError> {
+    pub fn add(&mut self, name: &str) -> Result<(), InvalidAttackErr> {
         // TODO warn if defender is on attacker's team?
         // TODO DESIGN - since assists sacrifice their tokens, should they be permitted to
         // pick a token to sacrifice?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
             if !self.attack.state.player_data(&pname).has_power(self.attack.def_power) {
-                return Err(DummyError::Dummy);
+                return Err(InvalidAttackErr::CombatantMissingPowerType);
             }
-            if self.attack.defender_assists.insert(pname) {
-                return Ok(());
+            if !self.attack.defender_assists.insert(pname) {
+                return Err(InvalidAttackErr::DuplicateCombatant);
             }
+            Ok(())
+        } else {
+            Err(InvalidAttackErr::CombatantNotFound)
         }
-        Err(DummyError::Dummy)
     }
 
     pub fn add_or_panic(mut self, name: &str) -> Self {
@@ -264,20 +269,22 @@ impl<'a> fmt::Display for AddAttacker<'a> {
 }
 
 impl<'a> AddAttacker<'a> {
-    pub fn add(&mut self, name: &str) -> Result<(), DummyError> {
+    pub fn add(&mut self, name: &str) -> Result<(), InvalidAttackErr> {
         // TODO warn if attacker is on defender's team?
         if let Some((pname, _)) = self.attack.state.player_by_name(name) {
             if !self.attack.state.player_data(&pname).has_power(self.attack.def_power) {
-                return Err(DummyError::Dummy);
+                return Err(InvalidAttackErr::CombatantMissingPowerType);
             }
             if pname == self.attack.targeted_defender || self.attack.defender_assists.contains(&pname) {
-                return Err(DummyError::Dummy)
+                return Err(InvalidAttackErr::AttackerAlreadyDefending);
             }
-            if self.attack.attacker_assists.insert(pname) {
-                return Ok(());
+            if !self.attack.attacker_assists.insert(pname) {
+                return Err(InvalidAttackErr::DuplicateCombatant)
             }
+            Ok(())
+        } else {
+            Err(InvalidAttackErr::CombatantNotFound)
         }
-        Err(DummyError::Dummy)
     }
 
     pub fn add_or_panic(mut self, name: &str) -> Self {

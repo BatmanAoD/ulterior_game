@@ -8,7 +8,7 @@ fn main() {
 use ultlib::{actions, gamestate};
 
 #[test]
-fn dummy_game() -> Result<(), actions::attack::DummyError> {
+fn dummy_game() -> Result<(), actions::attack::InvalidAttackErr> {
     let mut game = gamestate::builder::Setup::new_game()
         .add_team_or_panic("Geats")
         .add_team_or_panic("Danes")
