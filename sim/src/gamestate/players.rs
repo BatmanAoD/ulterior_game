@@ -3,7 +3,7 @@ use std::fmt;
 
 use rand::distributions::Range;
 
-use crate::gamestate::power::{Power, PowerType, ColorPower};
+use crate::gamestate::power::{Power, PowerType};
 
 // TODO move to separate file
 #[derive(Debug)]
@@ -63,11 +63,11 @@ impl Player {
     }
 
     pub fn has_power(&self, ptype: PowerType) -> bool {
-        self.power[ptype].0.is_some()
+        self.power[ptype].nonempty()
     }
 
     pub fn lose_power(&mut self, ptype: PowerType) {
-        self.power[ptype] = ColorPower(None)
+        self.power[ptype].discard()
     }
 
     pub fn pretty<'a>(player: &'a Player) -> String {
@@ -88,7 +88,7 @@ impl Player {
 // Does not print the team name or the role.
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "{}:\t\t{}", self.name.0, self.power)
+        writeln!(f, "{:>12}: {}", self.name.0, self.power)
     }
 }
 

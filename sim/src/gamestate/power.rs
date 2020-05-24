@@ -75,18 +75,28 @@ impl fmt::Display for Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            "{red}\t{green}\t{blue}",
-            red = self.red.pretty_or_empty(Color::Red),
-            blue = self.blue.pretty_or_empty(Color::Blue),
-            green = self.green.pretty_or_empty(Color::Green),
+            // XXX the width argument only seems to work for the 'empty' case. Why?
+            "{:7}{:7}{}",
+            self.red.pretty_or_empty(Color::Red),
+            self.blue.pretty_or_empty(Color::Blue),
+            self.green.pretty_or_empty(Color::Green),
         )
     }
 }
 
 #[derive(Copy, Clone, Debug)]
-pub struct ColorPower(/*XXX TEMP */pub Option<i8>);
+pub struct ColorPower(Option<i8>);
 
 impl ColorPower {
+    pub fn discard(&mut self) {
+        self.0 = None;
+    }
+
+    // XXX better name
+    pub fn nonempty(&self) -> bool {
+        self.0.is_some()
+    }
+
     fn pretty_or_empty(self, color: Color) -> String {
         match self.0 {
             Some(_) => self.pretty(color),
@@ -95,7 +105,7 @@ impl ColorPower {
     }
     fn pretty(self, color: Color) -> String {
         format!(
-            "{}{}{}",
+            "{}{}{:3}", // Q: width works here but not above (in Power::fmt); why?
             "(".to_string().bold().color(color),
             self.to_string(),
             ")".to_string().bold().color(color),
