@@ -75,7 +75,7 @@ impl fmt::Display for Power {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
-            // XXX the width argument only seems to work for the 'empty' case. Why?
+            // Q: the width argument only seems to work for the 'empty' case. Why?
             "{:7}{:7}{}",
             self.red.pretty_or_empty(Color::Red),
             self.blue.pretty_or_empty(Color::Blue),
@@ -92,7 +92,7 @@ impl ColorPower {
         self.0 = None;
     }
 
-    // XXX better name
+    // TODO better name
     pub fn nonempty(&self) -> bool {
         self.0.is_some()
     }

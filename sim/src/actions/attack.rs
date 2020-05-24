@@ -149,7 +149,9 @@ impl<'a> DeclaredAttack<'a> {
     ) -> Result<AddDefender<'g>, InvalidAttackErr> {
         let (attacker_name, att_team) = state.player_by_name(attacker).ok_or(InvalidAttackErr::CombatantNotFound)?;
         let (defender_name, def_team) = state.player_by_name(defender).ok_or(InvalidAttackErr::CombatantNotFound)?;
-        // XXX error if defender no longer has their token of the appropriate color
+        if !state.player_data(defender_name).has_power(def_power) {
+            return Err(InvalidAttackErr::CombatantMissingPowerType)
+        }
         Ok(AddDefender {
             attack: DeclaredAttack {
                 initial_attacker: attacker_name,
