@@ -2,4 +2,4 @@
 Notes on, and simulation of, a planned board game
 
 ## TODO 
-Conaider using this for simulation and/or online version: boardgame.io
+Consider using this for simulation and/or online version: boardgame.io
