@@ -7,6 +7,7 @@ authors = ["BatmanAoD"]
 [dependencies]
 colored = "1"
 itertools = "*"
+# TODO consider switching to `thiserror`
 quick-error = "1"
 rand = "*"
 rand_derive = "*"
