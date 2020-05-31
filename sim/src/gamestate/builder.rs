@@ -158,11 +158,7 @@ impl Setup {
 
 impl fmt::Display for Setup {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(
-            f,
-            "Teams: {}, Players: {}",
-            self.team_names.iter().join(", "),
-            self.player_names.iter().join(", ")
-        )
+        writeln!(f, "Teams: {}", self.team_names.iter().join(", "))?;
+        writeln!(f, "Players: {}", self.player_names.iter().join(", "))
     }
 }

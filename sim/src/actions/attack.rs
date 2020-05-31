@@ -14,7 +14,6 @@ pub struct Attack {
     defenders: NamedCombatants,
 }
 
-#[derive(Debug)]
 pub struct AttackOutcome {
     attack: Attack,
     /* XXX TEMP pub */ pub new_state: TeamsByName,
@@ -51,7 +50,6 @@ impl fmt::Display for NamedCombatants {
     }
 }
 
-#[derive(Debug)]
 struct CombatantRefs<'a> {
     primary: &'a mut Player,
     assists: Vec<&'a mut Player>,
@@ -152,7 +150,6 @@ impl Attack {
     }
 }
 
-#[derive(Debug)]
 pub struct DeclaredAttack<'a> {
     initial_attacker: PName,
     attacker_assists: BTreeSet<PName>,

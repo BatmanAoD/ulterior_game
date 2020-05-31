@@ -12,7 +12,7 @@ use crate::gamestate::players::{PName, Player, PlayersByName};
 // this module, only references to valid TNames could be acquired.
 pub struct TName(pub String);
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct Team {
     players: PlayersByName,
     honor: i16,
@@ -36,7 +36,7 @@ impl fmt::Display for Team {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct TeamsByName(HashMap<TName, Team>);
 
 impl TeamsByName {

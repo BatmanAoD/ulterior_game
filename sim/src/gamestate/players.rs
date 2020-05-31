@@ -4,7 +4,7 @@ use std::fmt;
 use crate::gamestate::power::{Power, PowerType};
 
 // TODO move to separate file
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum Role {
     Prophet { target: String },
     Traitor,
@@ -39,7 +39,7 @@ pub trait PlayerAttributePool {
     fn is_empty(&self) -> bool;
 }
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub struct Player {
     pub name: PName,
     pub team: String, // TODO should be TName
@@ -87,6 +87,15 @@ impl Player {
         }
         formatted
     }
+
+    pub fn format_role(&self) -> String {
+        match &self.role {
+            Some(Role::Prophet{ target: t }) => format!("Prophet: protect {} at all costs", t),
+            Some(Role::Traitor) => "Traitor: try not to let the destined one survive".to_owned(),
+            // Destined players do not know that they are Destined.
+            _ => "Few know their own destiny; you have yet to discover yours.".to_owned(),
+        }
+    }
 }
 
 // Does not included the team name (which can be printed separately) or the role
@@ -97,7 +106,7 @@ impl fmt::Display for Player {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Default)]
 pub struct PlayersByName(HashMap<PName, Player>);
 
 impl PlayersByName {

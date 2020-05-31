@@ -1,5 +1,6 @@
 use ultlib::actions::attack::{AddAttacker, AddDefender, Attack, DeclaredAttack};
 use ultlib::gamestate::{active::ActiveGame, builder::Setup, power::PowerType};
+use ultlib::gh_pages::write_roles;
 
 use quick_error::quick_error;
 use shrust::{ExecError, Shell, ShellIO};
@@ -71,8 +72,16 @@ fn setup_game() -> ActiveGame {
     });
     shell.set_prompt("Add new team or player name, or 'quit' to finish setup:".into());
 
-    prompt(shell);
-    setup.finalize().expect("Could not initialize game")
+    let mut io = prompt(shell);
+    let game = setup.finalize().expect("Could not initialize game");
+
+    print!("Please provide a unique name for this game: ");
+    let mut reader = BufReader::new(&mut io);
+    let mut game_name = String::new();
+    reader.read_line(&mut game_name).expect("Could not read from standard in!");
+    write_roles(&game, game_name);
+    game
+
 }
 
 fn ensure_player_exists(game: &ActiveGame, name: &str) -> Result<(), ExecError> {
@@ -151,8 +160,9 @@ fn add_attackers(mut declared: AddAttacker) -> Result<Attack, ExecError> {
     Ok(declared.finalize_offense())
 }
 
-fn prompt<T>(mut shell: Shell<T>) {
+fn prompt<T>(mut shell: Shell<T>) -> ShellIO {
     let mut io = ShellIO::default();
     shell.print_help(&mut io).unwrap();
     shell.run_loop(&mut io);
+    io
 }

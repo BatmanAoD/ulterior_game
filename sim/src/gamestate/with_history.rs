@@ -10,14 +10,12 @@ quick_error! {
     }
 }
 
-#[derive(Debug)]
 pub struct GameHistory {
     initial_state: TeamsByName,
     states: Vec<GameStateNode>,
     current: Option<usize>,
 }
 
-#[derive(Debug)]
 struct GameStateNode {
     data: AttackOutcome,
     previous: Option<usize>,
@@ -63,6 +61,8 @@ impl GameHistory {
         self.current = previous;
         Ok(())
     }
+
+    // TODO do something w/ attack data in the nodes? Currently unused
 
     fn node(&self, index: usize) -> &GameStateNode {
         &self.states[index]

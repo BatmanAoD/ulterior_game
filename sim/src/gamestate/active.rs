@@ -4,9 +4,14 @@ use crate::gamestate::teams::{TName, TeamsByName};
 use crate::gamestate::with_history::{GameHistory, HistoryNavigationErr};
 
 use rand::seq::SliceRandom;
-use std::fmt;
 
-#[derive(Debug)]
+use std::collections::BTreeMap;
+use std::collections::hash_map::DefaultHasher;
+use std::hash::{Hash, Hasher};
+use std::path::Path;
+use std::fmt;
+use std::fs;
+
 pub struct ActiveGame(GameHistory);
 
 impl ActiveGame {
@@ -90,6 +95,23 @@ impl ActiveGame {
 
     pub fn pretty_players<'a>(&self, names: impl Iterator<Item = &'a PName>) -> String {
         self.current_state().pretty_players(names)
+    }
+
+    // Returns a mapping from the player name to the name of the file created for them
+    pub fn write_roles<P: AsRef<Path>>(&self, d: P) -> BTreeMap<PName, String> {
+        let dir = d.as_ref();
+        assert!(dir.is_dir(), "'write_roles' given non-dir argument");
+        let mut players_to_files: BTreeMap<_,_> = Default::default();
+        for player in self.players() {
+            let mut hasher = DefaultHasher::new();
+            player.name.hash(&mut hasher);
+            let basename = format!("{:x}", hasher.finish()) + ".md";
+            let fpath = dir.join(&basename);
+            // TODO is it important to put the player name in the file?
+            fs::write(fpath, &player.format_role()).expect("Could not write role file!");
+            players_to_files.insert(player.name.to_owned(), basename);
+        }
+        players_to_files
     }
 }
 
