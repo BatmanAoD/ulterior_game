@@ -3,6 +3,7 @@ use std::fmt;
 
 use itertools::Itertools;
 use rand::distributions::Uniform;
+use rand::Rng;
 use rand::seq::IteratorRandom;
 use quick_error::quick_error;
 
@@ -57,7 +58,13 @@ impl PlayerAttributePool for PlayerAttributeProvider {
             return Some(Role::Destined)
         }
         let probability_has_role = self.roles.len() as f64 / (self.num_players_remaining as f64 + 1.0);
-        None    // XXX TEMP
+        let mut rng = rand::thread_rng();
+        if rng.gen_bool(probability_has_role) {
+            let index = rng.sample(Uniform::new(0, self.roles.len()));
+            Some(self.roles.remove(index))
+        } else {
+            None
+        }
     }
     fn is_empty(&self) -> bool {
         self.power_token_sets.is_empty() && self.num_players_remaining == 0
