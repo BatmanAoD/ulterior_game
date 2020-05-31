@@ -67,7 +67,9 @@ impl PlayerAttributePool for PlayerAttributeProvider {
         }
     }
     fn is_empty(&self) -> bool {
-        self.power_token_sets.is_empty() && self.num_players_remaining == 0
+        self.power_token_sets.is_empty()
+        && self.num_players_remaining == 0
+        && self.roles.is_empty()
     }
 }
 
