@@ -18,7 +18,7 @@ pub struct GameHistory {
 }
 
 #[derive(Debug)]
-struct GameStateNode{
+struct GameStateNode {
     data: AttackOutcome,
     previous: Option<usize>,
     // next: Option<usize>, // ignore for now
@@ -48,7 +48,10 @@ impl GameHistory {
     }
 
     pub fn apply_attack(&mut self, attack: AttackOutcome) {
-        self.states.push(GameStateNode{data: attack, previous: self.current});
+        self.states.push(GameStateNode {
+            data: attack,
+            previous: self.current,
+        });
         self.current = Some(self.states.len() - 1)
     }
 

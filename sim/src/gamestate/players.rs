@@ -101,7 +101,11 @@ impl fmt::Display for Player {
 pub struct PlayersByName(HashMap<PName, Player>);
 
 impl PlayersByName {
-    pub fn from(team: &str, names: impl Iterator<Item = String>, attribute_pool: &mut dyn PlayerAttributePool) -> Self {
+    pub fn from(
+        team: &str,
+        names: impl Iterator<Item = String>,
+        attribute_pool: &mut dyn PlayerAttributePool,
+    ) -> Self {
         let mut map = HashMap::new();
         for name in names {
             map.insert(PName(name.clone()), Player::new(name, team, attribute_pool));

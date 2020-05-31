@@ -1,7 +1,7 @@
 use crate::actions::attack::{Attack, AttackOutcome};
 use crate::gamestate::players::{PName, Player, PlayerAttributePool, PlayersByName};
 use crate::gamestate::teams::{TName, TeamsByName};
-use crate::gamestate::with_history::{HistoryNavigationErr, GameHistory};
+use crate::gamestate::with_history::{GameHistory, HistoryNavigationErr};
 
 use rand::seq::SliceRandom;
 use std::fmt;

@@ -2,10 +2,10 @@ use std::collections::BTreeSet;
 use std::fmt;
 
 use itertools::Itertools;
-use rand::distributions::Uniform;
-use rand::Rng;
-use rand::seq::IteratorRandom;
 use quick_error::quick_error;
+use rand::distributions::Uniform;
+use rand::seq::IteratorRandom;
+use rand::Rng;
 
 use crate::gamestate::active::ActiveGame;
 use crate::gamestate::players::{PlayerAttributePool, Role};
@@ -38,11 +38,16 @@ impl PlayerAttributeProvider {
         pool.power_token_sets.resize_with(
             num_players,
             // TODO: These should not be randomized independently
-            || Power::randomize(power_range, &mut rng));
+            || Power::randomize(power_range, &mut rng),
+        );
         // Q: How many 'destined'?
-        let destined = player_names.iter().choose(&mut rng).expect("No players in game").clone();
+        let destined = player_names
+            .iter()
+            .choose(&mut rng)
+            .expect("No players in game")
+            .clone();
         pool.destined.insert(destined.clone());
-        pool.roles.push(Role::Prophet{ target: destined });
+        pool.roles.push(Role::Prophet { target: destined });
         pool.roles.push(Role::Traitor);
         pool
     }
@@ -50,14 +55,17 @@ impl PlayerAttributeProvider {
 
 impl PlayerAttributePool for PlayerAttributeProvider {
     fn next_power(&mut self) -> Power {
-        self.power_token_sets.pop().expect("No more power tokens left")
+        self.power_token_sets
+            .pop()
+            .expect("No more power tokens left")
     }
     fn next_role(&mut self, name: &str) -> Option<Role> {
         self.num_players_remaining -= 1;
         if self.destined.contains(name) {
-            return Some(Role::Destined)
+            return Some(Role::Destined);
         }
-        let probability_has_role = self.roles.len() as f64 / (self.num_players_remaining as f64 + 1.0);
+        let probability_has_role =
+            self.roles.len() as f64 / (self.num_players_remaining as f64 + 1.0);
         let mut rng = rand::thread_rng();
         if rng.gen_bool(probability_has_role) {
             let index = rng.sample(Uniform::new(0, self.roles.len()));
@@ -67,9 +75,7 @@ impl PlayerAttributePool for PlayerAttributeProvider {
         }
     }
     fn is_empty(&self) -> bool {
-        self.power_token_sets.is_empty()
-        && self.num_players_remaining == 0
-        && self.roles.is_empty()
+        self.power_token_sets.is_empty() && self.num_players_remaining == 0 && self.roles.is_empty()
     }
 }
 
@@ -152,7 +158,8 @@ impl Setup {
 
 impl fmt::Display for Setup {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f,
+        write!(
+            f,
             "Teams: {}, Players: {}",
             self.team_names.iter().join(", "),
             self.player_names.iter().join(", ")

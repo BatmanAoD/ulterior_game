@@ -3,8 +3,8 @@ use std::ops::{Index, IndexMut};
 
 use colored::Color;
 use colored::Colorize;
-use rand::rngs::ThreadRng;
 use rand::distributions::{Distribution, Uniform};
+use rand::rngs::ThreadRng;
 use rand_derive::Rand;
 
 #[derive(Copy, Clone, Debug, Rand)]

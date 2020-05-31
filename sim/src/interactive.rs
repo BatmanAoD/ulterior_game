@@ -41,16 +41,11 @@ fn play(mut game: ActiveGame) {
             Ok(())
         },
     );
-    shell.new_command(
-        "undo",
-        "Undo last attack",
-        0,
-        |io, game, _s| {
-            game.undo_last_attack()?;
-            writeln!(io, "{}", game)?;
-            Ok(())
-        },
-    );
+    shell.new_command("undo", "Undo last attack", 0, |io, game, _s| {
+        game.undo_last_attack()?;
+        writeln!(io, "{}", game)?;
+        Ok(())
+    });
     shell.set_prompt("Playing! Start a new attack, undo last attack, or quit: ".into());
 
     prompt(shell);
