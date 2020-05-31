@@ -46,8 +46,9 @@ impl PowerType {
         1 | -2 => 1,
         2 | -1 => -1,
 
-        This is modular arithmetic, rotated by 1; add another 3 to make the
-        values positive so that `%` performs the correct operation.
+        This is modular arithmetic, rotated by 1 and back again; add another
+        3 to make the values positive so that `%` performs the correct
+        operation.
         */
         (self as i16 - against as i16 + 4) % 3 - 1
     }

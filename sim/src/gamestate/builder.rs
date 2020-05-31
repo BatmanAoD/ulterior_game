@@ -13,31 +13,52 @@ use crate::gamestate::power::Power;
 pub struct Setup {
     team_names: BTreeSet<String>,
     player_names: BTreeSet<String>,
-    attribute_pool: PlayerAttributeProvider,
 }
 
 struct PlayerAttributeProvider {
     power_token_sets: Vec<Power>,
-    roles: Vec<Option<Role>>,
+    num_players_remaining: usize,
+    destined: BTreeSet<String>,
 }
 
-impl Default for PlayerAttributeProvider {
-    fn default() -> Self {
+impl PlayerAttributeProvider {
+    fn new(player_names: &BTreeSet<String>) -> Self {
+        let num_players = player_names.len();
         let mut rng = rand::thread_rng();
         let power_range: Range<i8> = Range::new(1, 6);
-        unimplemented!()
+        let mut pool = PlayerAttributeProvider {
+            power_token_sets: Vec::with_capacity(num_players),
+            num_players_remaining: num_players,
+            destined: Default::default(),
+        };
+        pool.power_token_sets.resize_with(
+            num_players,
+            // TODO: These should not be randomized independently
+            || Power::randomize(power_range, &mut rng));
+        /*
+        // Q: How many 'destined'?
+        destined = player_names./*get random name*/
+        self.destined.push(destined);
+        self.roles.push(Role::Prophet(destined));
+        self.roles.push(Role::Traitor);
+        */
+        pool
     }
 }
 
 impl PlayerAttributePool for PlayerAttributeProvider {
     fn next_power(&mut self) -> Power {
-        unimplemented!()
+        self.power_token_sets.pop().expect("No more power tokens left")
     }
-    fn next_role(&mut self) -> Option<Role> {
-        unimplemented!()
+    fn next_role(&mut self, name: &str) -> Option<Role> {
+        self.num_players_remaining -= 1;
+        if self.destined.contains(name) {
+            return Some(Role::Destined)
+        }
+        None    // XXX TEMP
     }
-    fn is_empty(&mut self) -> bool {
-        unimplemented!()
+    fn is_empty(&self) -> bool {
+        self.power_token_sets.is_empty() && self.num_players_remaining == 0
     }
 }
 
@@ -74,14 +95,16 @@ impl Setup {
             return Err(StartGameErr::TeamsNotEstablished);
         }
         // TODO DESIGN min number of players?
-        if self.player_names.len() < self.team_names.len() * 3 {
+        let num_players = self.player_names.len();
+        if num_players < self.team_names.len() * 3 {
             return Err(StartGameErr::TooFewPlayers);
         }
 
+        let attributes_provider = PlayerAttributeProvider::new(&self.player_names);
         Ok(ActiveGame::new(
             self.player_names.into_iter(),
             self.team_names.into_iter(),
-            self.attribute_pool,
+            attributes_provider,
         ))
     }
 

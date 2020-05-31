@@ -8,7 +8,7 @@ use crate::gamestate::power::{Power, PowerType};
 pub enum Role {
     Prophet { target: String },
     Traitor,
-    // ...etc
+    Destined,
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Hash, Clone, Debug)]
@@ -32,10 +32,11 @@ impl PartialEq<&str> for PName {
 
 pub trait PlayerAttributePool {
     fn next_power(&mut self) -> Power;
-    fn next_role(&mut self) -> Option<Role>;
+    // Roles are not independent, so the name is required
+    fn next_role(&mut self, name: &str) -> Option<Role>;
 
     // Only for assertions or bookkeeping
-    fn is_empty(&mut self) -> bool;
+    fn is_empty(&self) -> bool;
 }
 
 #[derive(Clone, Debug)]
@@ -52,11 +53,12 @@ pub struct Player {
 
 impl Player {
     pub fn new(name: String, team: &str, attribute_pool: &mut dyn PlayerAttributePool) -> Player {
+        let role = attribute_pool.next_role(&name);
         Player {
             name: PName(name),
             team: team.to_owned(),
             power: attribute_pool.next_power(),
-            role: attribute_pool.next_role(),
+            role,
         }
     }
 
