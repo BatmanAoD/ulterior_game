@@ -1,0 +1,1 @@
+git add docs/; git commit -m"Publishing secrets" docs/; git push
