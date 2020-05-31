@@ -3,7 +3,8 @@ use std::ops::{Index, IndexMut};
 
 use colored::Color;
 use colored::Colorize;
-use rand::distributions::{Distribution, Range};
+use rand::rngs::ThreadRng;
+use rand::distributions::{Distribution, Uniform};
 use rand_derive::Rand;
 
 #[derive(Copy, Clone, Debug, Rand)]
@@ -62,7 +63,7 @@ pub struct Power {
 }
 
 impl Power {
-    pub fn randomize(power_range: Range<i8>, mut rng: &mut rand::ThreadRng) -> Self {
+    pub fn randomize(power_range: Uniform<i8>, mut rng: &mut ThreadRng) -> Self {
         Power {
             red: ColorPower(Some(power_range.sample(&mut rng))),
             green: ColorPower(Some(power_range.sample(&mut rng))),

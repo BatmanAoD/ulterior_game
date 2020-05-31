@@ -3,7 +3,7 @@ use crate::gamestate::players::{PName, Player, PlayerAttributePool, PlayersByNam
 use crate::gamestate::teams::{TName, TeamsByName};
 use crate::gamestate::with_history::{HistoryNavigationErr, GameHistory};
 
-use rand::Rng;
+use rand::seq::SliceRandom;
 use std::fmt;
 
 #[derive(Debug)]
@@ -18,7 +18,7 @@ impl ActiveGame {
         let mut rng = rand::thread_rng();
         let mut player_list = player_names.collect::<Vec<_>>();
         // Randomize player order
-        rng.shuffle(&mut player_list);
+        player_list.shuffle(&mut rng);
         let players_per_team = player_list.len() / team_names.len();
         let mut extra_players = player_list.len() % team_names.len();
         let mut teams: TeamsByName = Default::default();

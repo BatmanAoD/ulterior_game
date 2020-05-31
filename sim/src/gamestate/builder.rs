@@ -2,7 +2,8 @@ use std::collections::BTreeSet;
 use std::fmt;
 
 use itertools::Itertools;
-use rand::distributions::Range;
+use rand::distributions::Uniform;
+use rand::seq::IteratorRandom;
 use quick_error::quick_error;
 
 use crate::gamestate::active::ActiveGame;
@@ -18,6 +19,7 @@ pub struct Setup {
 struct PlayerAttributeProvider {
     power_token_sets: Vec<Power>,
     num_players_remaining: usize,
+    roles: Vec<Role>,
     destined: BTreeSet<String>,
 }
 
@@ -25,23 +27,22 @@ impl PlayerAttributeProvider {
     fn new(player_names: &BTreeSet<String>) -> Self {
         let num_players = player_names.len();
         let mut rng = rand::thread_rng();
-        let power_range: Range<i8> = Range::new(1, 6);
+        let power_range: Uniform<i8> = Uniform::new(1, 6);
         let mut pool = PlayerAttributeProvider {
             power_token_sets: Vec::with_capacity(num_players),
             num_players_remaining: num_players,
+            roles: Default::default(),
             destined: Default::default(),
         };
         pool.power_token_sets.resize_with(
             num_players,
             // TODO: These should not be randomized independently
             || Power::randomize(power_range, &mut rng));
-        /*
         // Q: How many 'destined'?
-        destined = player_names./*get random name*/
-        self.destined.push(destined);
-        self.roles.push(Role::Prophet(destined));
-        self.roles.push(Role::Traitor);
-        */
+        let destined = player_names.iter().choose(&mut rng).expect("No players in game").clone();
+        pool.destined.insert(destined.clone());
+        pool.roles.push(Role::Prophet{ target: destined });
+        pool.roles.push(Role::Traitor);
         pool
     }
 }
@@ -55,6 +56,7 @@ impl PlayerAttributePool for PlayerAttributeProvider {
         if self.destined.contains(name) {
             return Some(Role::Destined)
         }
+        let probability_has_role = self.roles.len() as f64 / (self.num_players_remaining as f64 + 1.0);
         None    // XXX TEMP
     }
     fn is_empty(&self) -> bool {
