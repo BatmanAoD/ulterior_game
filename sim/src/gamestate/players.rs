@@ -1,8 +1,6 @@
 use std::collections::HashMap;
 use std::fmt;
 
-use rand::distributions::Range;
-
 use crate::gamestate::power::{Power, PowerType};
 
 // TODO move to separate file
@@ -32,6 +30,14 @@ impl PartialEq<&str> for PName {
     }
 }
 
+pub trait PlayerAttributePool {
+    fn next_power(&mut self) -> Power;
+    fn next_role(&mut self) -> Option<Role>;
+
+    // Only for assertions or bookkeeping
+    fn is_empty(&mut self) -> bool;
+}
+
 #[derive(Clone, Debug)]
 pub struct Player {
     pub name: PName,
@@ -41,20 +47,16 @@ pub struct Player {
     power: Power,
     // Roles are NEVER changed; they are ONLY used to (1) impact player behavior
     // and (2) determine victory conditions
-    role: Option<Box<Role>>,
+    role: Option<Role>,
 }
 
 impl Player {
-    pub fn new(name: String, team: &str) -> Player {
-        // Q: Can I avoid re-creating these each time? (Not sure it matters, but still.) Neither
-        // object can be `static`.
-        let mut rng = rand::thread_rng();
-        let power_range: Range<i8> = Range::new(1, 6);
+    pub fn new(name: String, team: &str, attribute_pool: &mut dyn PlayerAttributePool) -> Player {
         Player {
             name: PName(name),
             team: team.to_owned(),
-            power: Power::randomize(power_range, &mut rng),
-            role: None,
+            power: attribute_pool.next_power(),
+            role: attribute_pool.next_role(),
         }
     }
 
@@ -85,7 +87,8 @@ impl Player {
     }
 }
 
-// Does not print the team name or the role.
+// Does not included the team name (which can be printed separately) or the role
+// (which is secret and should not be printed)
 impl fmt::Display for Player {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         writeln!(f, "{:>12}: {}", self.name.0, self.power)
@@ -96,10 +99,10 @@ impl fmt::Display for Player {
 pub struct PlayersByName(HashMap<PName, Player>);
 
 impl PlayersByName {
-    pub fn from(team: &str, names: impl Iterator<Item = String>) -> Self {
+    pub fn from(team: &str, names: impl Iterator<Item = String>, attribute_pool: &mut dyn PlayerAttributePool) -> Self {
         let mut map = HashMap::new();
         for name in names {
-            map.insert(PName(name.clone()), Player::new(name, team));
+            map.insert(PName(name.clone()), Player::new(name, team, attribute_pool));
         }
         PlayersByName(map)
     }

@@ -1,13 +1,44 @@
 use std::collections::BTreeSet;
+use std::fmt;
 
+use itertools::Itertools;
+use rand::distributions::Range;
 use quick_error::quick_error;
 
 use crate::gamestate::active::ActiveGame;
+use crate::gamestate::players::{PlayerAttributePool, Role};
+use crate::gamestate::power::Power;
 
-#[derive(Debug)]
+#[derive(Default)]
 pub struct Setup {
     team_names: BTreeSet<String>,
     player_names: BTreeSet<String>,
+    attribute_pool: PlayerAttributeProvider,
+}
+
+struct PlayerAttributeProvider {
+    power_token_sets: Vec<Power>,
+    roles: Vec<Option<Role>>,
+}
+
+impl Default for PlayerAttributeProvider {
+    fn default() -> Self {
+        let mut rng = rand::thread_rng();
+        let power_range: Range<i8> = Range::new(1, 6);
+        unimplemented!()
+    }
+}
+
+impl PlayerAttributePool for PlayerAttributeProvider {
+    fn next_power(&mut self) -> Power {
+        unimplemented!()
+    }
+    fn next_role(&mut self) -> Option<Role> {
+        unimplemented!()
+    }
+    fn is_empty(&mut self) -> bool {
+        unimplemented!()
+    }
 }
 
 // Q: Possible to somehow derive methods for enums when all variants provide
@@ -35,10 +66,7 @@ pub type OptErr<E> = Result<(), E>;
 
 impl Setup {
     pub fn new_game() -> Setup {
-        Setup {
-            team_names: BTreeSet::new(),
-            player_names: BTreeSet::new(),
-        }
+        Default::default()
     }
 
     pub fn finalize(self) -> Result<ActiveGame, StartGameErr> {
@@ -53,6 +81,7 @@ impl Setup {
         Ok(ActiveGame::new(
             self.player_names.into_iter(),
             self.team_names.into_iter(),
+            self.attribute_pool,
         ))
     }
 
@@ -84,5 +113,15 @@ impl Setup {
         } else {
             Ok(())
         }
+    }
+}
+
+impl fmt::Display for Setup {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f,
+            "Teams: {}, Players: {}",
+            self.team_names.iter().join(", "),
+            self.player_names.iter().join(", ")
+        )
     }
 }
