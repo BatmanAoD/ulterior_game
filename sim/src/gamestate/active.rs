@@ -105,8 +105,10 @@ impl ActiveGame {
         for player in self.players() {
             let mut hasher = DefaultHasher::new();
             player.name.hash(&mut hasher);
-            let basename = format!("{:x}", hasher.finish()) + ".md";
-            let fpath = dir.join(&basename);
+            let basename = format!("{:x}", hasher.finish());
+            // The `basename` should not include the extension, because GH Pages
+            // will not render the content if the URL includes the extension
+            let fpath = dir.join(basename.clone() + ".md");
             // TODO is it important to put the player name in the file?
             fs::write(fpath, &player.format_role()).expect("Could not write role file!");
             players_to_files.insert(player.name.to_owned(), basename);
