@@ -1,9 +1,9 @@
 use crate::actions::attack::{Attack, AttackOutcome};
-use crate::gamestate::players::{PName, Player, PlayersByName};
+use crate::gamestate::players::{PName, Player, PlayerAttributePool, PlayersByName};
 use crate::gamestate::teams::{TName, TeamsByName};
-use crate::gamestate::with_history::{HistoryNavigationErr, GameHistory};
+use crate::gamestate::with_history::{GameHistory, HistoryNavigationErr};
 
-use rand::Rng;
+use rand::seq::SliceRandom;
 use std::fmt;
 
 #[derive(Debug)]
@@ -13,11 +13,12 @@ impl ActiveGame {
     pub fn new(
         player_names: impl Iterator<Item = String>,
         team_names: impl ExactSizeIterator<Item = String>,
+        mut attribute_pool: impl PlayerAttributePool,
     ) -> Self {
         let mut rng = rand::thread_rng();
         let mut player_list = player_names.collect::<Vec<_>>();
         // Randomize player order
-        rng.shuffle(&mut player_list);
+        player_list.shuffle(&mut rng);
         let players_per_team = player_list.len() / team_names.len();
         let mut extra_players = player_list.len() % team_names.len();
         let mut teams: TeamsByName = Default::default();
@@ -34,10 +35,11 @@ impl ActiveGame {
 
             teams.add(
                 &team,
-                PlayersByName::from(&team, players_on_team),
+                PlayersByName::from(&team, players_on_team, &mut attribute_pool),
             );
         }
         assert!(player_list.is_empty());
+        assert!(attribute_pool.is_empty());
         ActiveGame(GameHistory::starting_with(teams))
     }
 

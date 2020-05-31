@@ -41,16 +41,11 @@ fn play(mut game: ActiveGame) {
             Ok(())
         },
     );
-    shell.new_command(
-        "undo",
-        "Undo last attack",
-        0,
-        |io, game, _s| {
-            game.undo_last_attack()?;
-            writeln!(io, "{}", game)?;
-            Ok(())
-        },
-    );
+    shell.new_command("undo", "Undo last attack", 0, |io, game, _s| {
+        game.undo_last_attack()?;
+        writeln!(io, "{}", game)?;
+        Ok(())
+    });
     shell.set_prompt("Playing! Start a new attack, undo last attack, or quit: ".into());
 
     prompt(shell);
@@ -64,14 +59,14 @@ fn setup_game() -> ActiveGame {
         setup
             .add_team(s[0])
             .map_err(|e| ExecError::Other(Box::new(e)))?;
-        writeln!(io, "{:?}", &setup)?;
+        writeln!(io, "{}", &setup)?;
         Ok(())
     });
     shell.new_command("player", "Add a new player", 1, |io, setup, s| {
         setup
             .add_player(s[0])
             .map_err(|e| ExecError::Other(Box::new(e)))?;
-        writeln!(io, "{:?}", &setup)?;
+        writeln!(io, "{}", &setup)?;
         Ok(())
     });
     shell.set_prompt("Add new team or player name, or 'quit' to finish setup:".into());

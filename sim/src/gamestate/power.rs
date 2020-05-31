@@ -3,7 +3,8 @@ use std::ops::{Index, IndexMut};
 
 use colored::Color;
 use colored::Colorize;
-use rand::distributions::{Distribution, Range};
+use rand::distributions::{Distribution, Uniform};
+use rand::rngs::ThreadRng;
 use rand_derive::Rand;
 
 #[derive(Copy, Clone, Debug, Rand)]
@@ -46,8 +47,9 @@ impl PowerType {
         1 | -2 => 1,
         2 | -1 => -1,
 
-        This is modular arithmetic, rotated by 1; add another 3 to make the
-        values positive so that `%` performs the correct operation.
+        This is modular arithmetic, rotated by 1 and back again; add another
+        3 to make the values positive so that `%` performs the correct
+        operation.
         */
         (self as i16 - against as i16 + 4) % 3 - 1
     }
@@ -61,7 +63,7 @@ pub struct Power {
 }
 
 impl Power {
-    pub fn randomize(power_range: Range<i8>, mut rng: &mut rand::ThreadRng) -> Self {
+    pub fn randomize(power_range: Uniform<i8>, mut rng: &mut ThreadRng) -> Self {
         Power {
             red: ColorPower(Some(power_range.sample(&mut rng))),
             green: ColorPower(Some(power_range.sample(&mut rng))),
