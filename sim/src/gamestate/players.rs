@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::BTreeMap;
 use std::fmt;
 
 use crate::gamestate::power::{Power, PowerType};
@@ -66,8 +66,16 @@ impl Player {
         self.power[ptype].into()
     }
 
+    pub fn is_dead(&self) -> bool {
+        self.powers_remaining().is_empty()
+    }
+
     pub fn has_power(&self, ptype: PowerType) -> bool {
         self.power[ptype].nonempty()
+    }
+
+    pub fn powers_remaining(&self) -> Vec<PowerType> {
+        self.power.remaining()
     }
 
     pub fn lose_power(&mut self, ptype: PowerType) {
@@ -107,7 +115,7 @@ impl fmt::Display for Player {
 }
 
 #[derive(Clone, Default)]
-pub struct PlayersByName(HashMap<PName, Player>);
+pub struct PlayersByName(BTreeMap<PName, Player>);
 
 impl PlayersByName {
     pub fn from(
@@ -115,7 +123,7 @@ impl PlayersByName {
         names: impl Iterator<Item = String>,
         attribute_pool: &mut dyn PlayerAttributePool,
     ) -> Self {
-        let mut map = HashMap::new();
+        let mut map = BTreeMap::new();
         for name in names {
             map.insert(PName(name.clone()), Player::new(name, team, attribute_pool));
         }

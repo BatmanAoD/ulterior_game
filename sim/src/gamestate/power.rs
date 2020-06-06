@@ -70,6 +70,16 @@ impl Power {
             blue: ColorPower(Some(power_range.sample(&mut rng))),
         }
     }
+
+    pub fn remaining(&self) -> Vec<PowerType> {
+        [  (PowerType::Red, self.red),
+            (PowerType::Blue, self.blue),
+            (PowerType::Green, self.green)
+        ].iter().flat_map(
+                |(ptype, plevel)| plevel.0.map(|_| *ptype)
+        )
+        .collect()
+    }
 }
 
 impl fmt::Display for Power {

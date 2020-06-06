@@ -1,6 +1,6 @@
 use itertools::Itertools;
 use quick_error::quick_error;
-use rand::Rng;
+use rand::seq::SliceRandom;
 use std::collections::BTreeSet;
 use std::fmt;
 
@@ -188,6 +188,9 @@ impl<'a> DeclaredAttack<'a> {
         if !state.player_data(&defender_name).has_power(def_power) {
             return Err(InvalidAttackErr::CombatantMissingPowerType);
         }
+        if state.player_data(&attacker_name).is_dead() {
+            return Err(InvalidAttackErr::AttackerIsDead);
+        }
         Ok(AddDefender {
             attack: DeclaredAttack {
                 initial_attacker: attacker_name,
@@ -259,6 +262,7 @@ quick_error! {
         CombatantMissingPowerType {}
         DuplicateCombatant {}
         AttackerAlreadyDefending {}
+        AttackerIsDead {}
     }
 }
 
@@ -292,9 +296,10 @@ impl<'a> AddDefender<'a> {
 
     pub fn finalize_defense(self) -> AddAttacker<'a> {
         let mut rng = rand::thread_rng();
+        let att_power = *self.attack.state.player_data(&self.attack.initial_attacker).powers_remaining().choose(&mut rng).expect("Attacker is...dead??");
         AddAttacker {
             attack: self.attack,
-            att_power: rng.gen(),
+            att_power,
         }
     }
 }
