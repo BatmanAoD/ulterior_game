@@ -69,6 +69,9 @@ impl<'a> CombatantRefs<'a> {
 }
 
 impl Attack {
+    pub fn attack_power(&self) -> PowerType {
+        self.attackers.power_type
+    }
     pub fn outcome(self, initial_state: &TeamsByName) -> AttackOutcome {
         let mut new_state = initial_state.clone();
         let (attackers, defenders) = self.combatants_by_ref(&mut new_state);
@@ -77,10 +80,11 @@ impl Attack {
         // TODO DESIGN - should ties, or near-ties, be resolved w/out loss of
         // power or gain of honor?
         let attack_succeeds = attack_strength + self.attack_bonus() > defense_strength;
-        let (losers, win_assists, winning_team, honor_won) = if attack_succeeds {
+        let (losers, win_assists, winning_power, winning_team, honor_won) = if attack_succeeds {
             (
                 defenders,
                 attackers.assists,
+                attackers.power_type,
                 &self.attackers.for_team,
                 defense_strength,
             )
@@ -88,6 +92,7 @@ impl Attack {
             (
                 attackers,
                 defenders.assists,
+                defenders.power_type,
                 &self.defenders.for_team,
                 attack_strength,
             )
@@ -95,8 +100,11 @@ impl Attack {
         // The primary combatant always loses their token.
         losers.primary.lose_power(losers.power_type);
         // Assists on *both* sides of the combat lose their tokens.
-        for assist in losers.assists.into_iter().chain(win_assists.into_iter()) {
+        for assist in losers.assists.into_iter() {
             assist.lose_power(losers.power_type);
+        }
+        for assist in win_assists.into_iter() {
+            assist.lose_power(winning_power);
         }
         new_state.gain_honor(winning_team, honor_won);
         AttackOutcome {

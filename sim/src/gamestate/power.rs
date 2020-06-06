@@ -7,7 +7,7 @@ use rand::distributions::{Distribution, Uniform};
 use rand::rngs::ThreadRng;
 use rand_derive::Rand;
 
-#[derive(Copy, Clone, Debug, Rand)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Rand)]
 pub enum PowerType {
     Red = 0,
     Blue = 1,
