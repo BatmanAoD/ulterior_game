@@ -2,11 +2,11 @@ use ultlib::actions::attack::{AddAttacker, AddDefender, Attack, DeclaredAttack};
 use ultlib::gamestate::{active::ActiveGame, builder::Setup, power::PowerType};
 use ultlib::gh_pages::write_roles;
 
+use chrono::prelude::*;
 use quick_error::quick_error;
 use shrust::{ExecError, Shell, ShellIO};
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::time::SystemTime;
 
 // TODO Eventually, there will need to be a way to show information to certain
 // players but not others.
@@ -83,7 +83,7 @@ fn setup_game() -> ActiveGame {
     let mut io = prompt(shell);
     let game = setup.finalize().expect("Could not initialize game");
 
-    let game_name = format!("{:?}", SystemTime::now()).trim().replace(" ", "").to_owned();
+    let game_name = Local::now().to_rfc3339();
     println!("Game name: {}", &game_name);
     write_roles(&game, game_name.to_owned());
     game

@@ -6,6 +6,7 @@ authors = ["BatmanAoD"]
 
 [dependencies]
 colored = "1"
+chrono = "*"
 itertools = "*"
 # TODO consider switching to `thiserror`
 quick-error = "1"
