@@ -12,8 +12,10 @@ pub fn write_roles(game: &ActiveGame, name: String) {
     let written = game.write_roles(&game_dir);
     publish_files();
     println!("SECRET role information can be found at these URLs:");
+    let alternate_base = get_alternate_base(&name);
     for (player, file) in written {
         println!("{:<15}{}{}", player, game_base_url, file);
+        // println!("Alternate: {:<15}{}{}.md", player, alternate_base, file);
     }
 }
 
@@ -24,6 +26,11 @@ fn get_game_dir(name: &str) -> PathBuf {
 
 fn get_base_url(name: &str) -> String {
     format!("https://batmanaod.github.io/ulterior_game/docs/{}/roles/", name)
+}
+
+fn get_alternate_base(name: &str) -> String {
+    // XXX TEMP
+    format!("https://github.com/BatmanAoD/ulterior_game/blob/gh-pages/docs/{}/roles/", name)
 }
 
 fn publish_files() {
