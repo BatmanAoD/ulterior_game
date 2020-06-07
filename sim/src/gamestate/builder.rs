@@ -66,19 +66,15 @@ impl PlayerAttributePool for PlayerAttributeProvider {
             .expect("No more power tokens left")
     }
     fn next_role(&mut self, name: &str) -> Option<Role> {
-        println!("Assigning role to {}", name);     // XXX TEMP
         if self.without_role.contains(name) {
-            println!("Player is not allowed to have a role");   // XXX TEMP
             return None
         }
         if self.destined.contains(name) {
-            println!("Player is destined");   // XXX TEMP
             return Some(Role::Destined);
         }
         let probability_has_role =
             self.roles.len() as f64 / (self.num_role_assignments_remaining as f64);
         self.num_role_assignments_remaining -= 1;
-        println!("Assignment probability: {}/{} = {}", self.roles.len(), self.num_role_assignments_remaining, probability_has_role);
         let mut rng = rand::thread_rng();
         if rng.gen_bool(probability_has_role) {
             let index = rng.sample(Uniform::new(0, self.roles.len()));
@@ -88,7 +84,6 @@ impl PlayerAttributePool for PlayerAttributeProvider {
         }
     }
     fn is_empty(&self) -> bool {
-        println!("{:#?}", self);
         self.power_token_sets.is_empty() && self.num_role_assignments_remaining == 0 && self.roles.is_empty()
     }
 }

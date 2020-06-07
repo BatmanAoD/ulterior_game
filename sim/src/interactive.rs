@@ -70,6 +70,13 @@ fn setup_game() -> ActiveGame {
         writeln!(io, "{}", &setup)?;
         Ok(())
     });
+    shell.new_command("no-role", "Specify that player cannot have a role", 1, |io, setup, s| {
+        setup
+            .player_without_role(s[0])
+            .map_err(|e| ExecError::Other(Box::new(e)))?;
+        writeln!(io, "{}", &setup)?;
+        Ok(())
+    });
     shell.set_prompt("Add new team or player name, or 'quit' to finish setup:".into());
 
     let mut io = prompt(shell);
