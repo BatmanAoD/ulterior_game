@@ -83,7 +83,7 @@ fn setup_game() -> ActiveGame {
     let mut io = prompt(shell);
     let game = setup.finalize().expect("Could not initialize game");
 
-    let game_name = format!("{:?}", SystemTime::now()).trim();
+    let game_name = format!("{:?}", SystemTime::now()).trim().replace(" ", "").to_owned();
     println!("Game name: {}", &game_name);
     write_roles(&game, game_name.to_owned());
     game
