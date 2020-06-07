@@ -15,25 +15,29 @@ use crate::gamestate::power::Power;
 pub struct Setup {
     team_names: BTreeSet<String>,
     player_names: BTreeSet<String>,
+    without_role: BTreeSet<String>,
 }
 
+#[derive(Debug)]
 struct PlayerAttributeProvider {
     power_token_sets: Vec<Power>,
-    num_players_remaining: usize,
+    num_role_assignments_remaining: usize,
     roles: Vec<Role>,
     destined: BTreeSet<String>,
+    without_role: BTreeSet<String>,
 }
 
 impl PlayerAttributeProvider {
-    fn new(player_names: &BTreeSet<String>) -> Self {
+    fn new(player_names: &BTreeSet<String>, without_role: BTreeSet<String>) -> Self {
         let num_players = player_names.len();
         let mut rng = rand::thread_rng();
         let power_range: Uniform<i8> = Uniform::new(1, 6);
         let mut pool = PlayerAttributeProvider {
             power_token_sets: Vec::with_capacity(num_players),
-            num_players_remaining: num_players,
+            num_role_assignments_remaining: num_players - without_role.len(),
             roles: Default::default(),
             destined: Default::default(),
+            without_role,
         };
         pool.power_token_sets.resize_with(
             num_players,
@@ -43,12 +47,14 @@ impl PlayerAttributeProvider {
         // Q: How many 'destined'?
         let destined = player_names
             .iter()
+            .filter(|&p| !pool.without_role.contains(p))
             .choose(&mut rng)
             .expect("No players in game")
             .clone();
         pool.destined.insert(destined.clone());
         pool.roles.push(Role::Prophet { target: destined });
         pool.roles.push(Role::Traitor);
+        pool.num_role_assignments_remaining -= pool.destined.len();
         pool
     }
 }
@@ -60,12 +66,19 @@ impl PlayerAttributePool for PlayerAttributeProvider {
             .expect("No more power tokens left")
     }
     fn next_role(&mut self, name: &str) -> Option<Role> {
-        self.num_players_remaining -= 1;
+        println!("Assigning role to {}", name);     // XXX TEMP
+        if self.without_role.contains(name) {
+            println!("Player is not allowed to have a role");   // XXX TEMP
+            return None
+        }
         if self.destined.contains(name) {
+            println!("Player is destined");   // XXX TEMP
             return Some(Role::Destined);
         }
         let probability_has_role =
-            self.roles.len() as f64 / (self.num_players_remaining as f64 + 1.0);
+            self.roles.len() as f64 / (self.num_role_assignments_remaining as f64);
+        self.num_role_assignments_remaining -= 1;
+        println!("Assignment probability: {}/{} = {}", self.roles.len(), self.num_role_assignments_remaining, probability_has_role);
         let mut rng = rand::thread_rng();
         if rng.gen_bool(probability_has_role) {
             let index = rng.sample(Uniform::new(0, self.roles.len()));
@@ -75,7 +88,8 @@ impl PlayerAttributePool for PlayerAttributeProvider {
         }
     }
     fn is_empty(&self) -> bool {
-        self.power_token_sets.is_empty() && self.num_players_remaining == 0 && self.roles.is_empty()
+        println!("{:#?}", self);
+        self.power_token_sets.is_empty() && self.num_role_assignments_remaining == 0 && self.roles.is_empty()
     }
 }
 
@@ -89,6 +103,7 @@ quick_error! {
     pub enum GameSetupErr {
         PlayerNameDuplicated {}
         TeamNameDuplicated {}
+        PlayerDoesNotExist {}
     }
 }
 
@@ -117,14 +132,16 @@ impl Setup {
             return Err(StartGameErr::TooFewPlayers);
         }
 
-        let attributes_provider = PlayerAttributeProvider::new(&self.player_names);
+        let (players, teams, exclusions) = (self.player_names, self.team_names, self.without_role);
+        let attributes_provider = PlayerAttributeProvider::new(&players, exclusions);
         Ok(ActiveGame::new(
-            self.player_names.into_iter(),
-            self.team_names.into_iter(),
+            players.into_iter(),
+            teams.into_iter(),
             attributes_provider,
         ))
     }
 
+    // TODO having the `panic` methods chain but the non-`panic` methods not chain is... super gross.
     pub fn add_team_or_panic(mut self, name: &str) -> Self {
         self.add_team(name).unwrap();
         println!("Added team: {}", name);
@@ -134,6 +151,12 @@ impl Setup {
     pub fn add_player_or_panic(mut self, name: &str) -> Self {
         self.add_player(name).unwrap();
         println!("Added player: {}", name);
+        self
+    }
+
+    pub fn player_without_role_or_panic(mut self, name: &str) -> Self {
+        self.player_without_role(name).unwrap();
+        println!("Player will not have a role: {}", name);
         self
     }
 
@@ -147,12 +170,20 @@ impl Setup {
     }
 
     pub fn add_player(&mut self, name: &str) -> OptErr<GameSetupErr> {
-        let already_exists = !self.player_names.insert(String::from(name));
+        let already_exists = !self.player_names.insert(name.to_owned());
         if already_exists {
             Err(GameSetupErr::PlayerNameDuplicated)
         } else {
             Ok(())
         }
+    }
+
+    pub fn player_without_role(&mut self, name: &str) -> OptErr<GameSetupErr> {
+        if !self.player_names.contains(name) {
+            return Err(GameSetupErr::PlayerDoesNotExist);
+        }
+        self.without_role.insert(name.to_owned());
+        Ok(())
     }
 }
 

@@ -22,9 +22,12 @@ fn dummy_game() -> Result<(), Box<dyn std::error::Error>> {
         .add_player_or_panic("Annabelle")
         .add_player_or_panic("Luna")
         .add_player_or_panic("Rosie")
+        .player_without_role_or_panic("Annabelle")
         .finalize()
         .unwrap();
     println!("Start-of-game setup: {}", &game);
+
+    assert!(game.player_data(&game.player_by_name("Annabelle").unwrap().0).format_role() == "Few know their own destiny; you have yet to discover yours.");
 
     let attack = DeclaredAttack::declare(
         &game.current_state(),

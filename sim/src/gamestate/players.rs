@@ -4,7 +4,7 @@ use std::fmt;
 use crate::gamestate::power::{Power, PowerType};
 
 // TODO move to separate file
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Role {
     Prophet { target: String },
     Traitor,
