@@ -6,6 +6,7 @@ use quick_error::quick_error;
 use shrust::{ExecError, Shell, ShellIO};
 use std::io::prelude::*;
 use std::io::BufReader;
+use std::time::SystemTime;
 
 // TODO Eventually, there will need to be a way to show information to certain
 // players but not others.
@@ -82,11 +83,9 @@ fn setup_game() -> ActiveGame {
     let mut io = prompt(shell);
     let game = setup.finalize().expect("Could not initialize game");
 
-    println!("Please provide a unique name for this game: ");
-    let mut reader = BufReader::new(&mut io);
-    let mut game_name = String::new();
-    reader.read_line(&mut game_name).expect("Could not read from standard in!");
-    write_roles(&game, game_name.trim().to_owned());
+    let game_name = format!("{:?}", SystemTime::now()).trim();
+    println!("Game name: {}", &game_name);
+    write_roles(&game, game_name.to_owned());
     game
 
 }
