@@ -1,8 +1,10 @@
 # ulterior_game
 Notes on, and simulation of, a planned board game
 
-## TODO 
-Consider using this for simulation and/or online version: boardgame.io
+## Possible tools for implementation
+
+* https://boardgame.io
+* https://boardgamelab.app
 
 ## Original "keep" note
 
