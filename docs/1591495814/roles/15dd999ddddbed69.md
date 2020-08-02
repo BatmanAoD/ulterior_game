@@ -1,1 +1,0 @@
-Few know their own destiny; you have yet to discover yours.

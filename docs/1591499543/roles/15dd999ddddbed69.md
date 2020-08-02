@@ -1,1 +1,0 @@
-Traitor: try not to let the destined one survive
