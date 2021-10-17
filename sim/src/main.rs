@@ -25,7 +25,7 @@ fn dummy_game() -> Result<(), actions::attack::InvalidAttackErr> {
     println!("Start-of-game setup: {}", &game);
 
     let attack = actions::attack::DeclaredAttack::declare(
-        &game.current_state(),
+        game.current_state(),
         "Kyle",
         "Brandon",
         gamestate::power::PowerType::Red,

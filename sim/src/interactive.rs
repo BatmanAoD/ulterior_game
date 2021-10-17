@@ -108,7 +108,7 @@ fn declare_attack<'a>(
         }
     };
 
-    DeclaredAttack::declare(&game.current_state(), s[0], s[1], power_type)
+    DeclaredAttack::declare(game.current_state(), s[0], s[1], power_type)
         .map_err(|e| ExecError::Other(Box::new(e)))
 }
 
