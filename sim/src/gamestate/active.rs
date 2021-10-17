@@ -84,7 +84,7 @@ impl ActiveGame {
         self.0.current_mut().players_mut()
     }
 
-    pub fn pretty_player<'a>(&self, name: &'a PName) -> String {
+    pub fn pretty_player(&self, name: & PName) -> String {
         self.current_state().pretty_player(name)
     }
 
