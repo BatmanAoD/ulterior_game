@@ -2,7 +2,7 @@ use itertools::Itertools;
 use quick_error::quick_error;
 use rand::Rng;
 use std::collections::BTreeSet;
-use std::fmt;
+use std::{fmt, iter};
 
 use crate::gamestate::players::{PName, Player};
 use crate::gamestate::power::PowerType;
@@ -60,13 +60,14 @@ struct CombatantRefs<'a> {
 
 impl<'a> CombatantRefs<'a> {
     fn strength(&self) -> i16 {
-        self.primary.strength(self.power_type) as i16
-            + self
-                .assists
-                .iter()
-                // Q: is explicit casting a reasonable way to avoid overflow here?
-                .map(|a| a.strength(self.power_type) as i16)
-                .sum::<i16>()
+        self
+            .assists
+            .iter()
+            .map(|a| a.strength(self.power_type))
+            .chain(iter::once(self.primary.strength(self.power_type)))
+            // Cast prior to adding, to support overflow from i8
+            .map(|a| a as i16)
+            .sum()
     }
 }
 

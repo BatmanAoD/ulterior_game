@@ -81,8 +81,6 @@ impl PlayerAttributePool for PlayerAttributeProvider {
 
 // Q: Possible to somehow derive methods for enums when all variants provide
 // that method?
-// Q: Why is it necessary to specify the enum name when matching on an enum?
-// (Except `Result`, it seems?)
 
 quick_error! {
     #[derive(Debug)]
