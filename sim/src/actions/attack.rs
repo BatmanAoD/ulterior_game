@@ -111,6 +111,32 @@ impl Attack {
         &self,
         state: &'a mut TeamsByName,
     ) -> (CombatantRefs<'a>, CombatantRefs<'a>) {
+        let (mut primary_attacker, mut primary_defender) = (None, None);
+        let (mut attacker_assists, mut defender_assists) = (Vec::new(), Vec::new());
+        for player in state.players_mut() {
+            if player.name == self.attackers.primary {
+                primary_attacker = Some(player);
+            } else if player.name == self.defenders.primary {
+                primary_defender = Some(player);
+            } else if self.attackers.assists.contains(&player.name) {
+                attacker_assists.push(player);
+            } else if self.defenders.assists.contains(&player.name) {
+                defender_assists.push(player);
+            }
+        }
+        (
+            CombatantRefs {
+                primary: primary_attacker.expect("Could not find primary attacker data"),
+                assists: attacker_assists,
+                power_type: self.attackers.power_type,
+            },
+            CombatantRefs {
+                primary: primary_defender.expect("Could not find primary defender data"),
+                assists: defender_assists,
+                power_type: self.defenders.power_type,
+            },
+        )
+        /*
         // Q: This is... pretty ugly. Is there a more elegant way? Slice patterns, maybe?
         let (v_primary_attacker, others): (Vec<_>, Vec<_>) = state
             .players_mut()
@@ -145,6 +171,7 @@ impl Attack {
                 power_type: self.defenders.power_type,
             },
         )
+        */
     }
     fn attack_bonus(&self) -> i16 {
         self.attackers
